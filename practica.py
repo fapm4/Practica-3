@@ -180,7 +180,7 @@ def main():
     
     val = 1
 
-    while (val >= 1 and val <= 4) and val != 5:
+    while (val >= 0 and val <= 4) and val != 5:
         print('0. Inicializar la base de datos\n')
         print('1. Gestión de Clientes\n')
         print('2. Gestión de Entrenadores\n')
