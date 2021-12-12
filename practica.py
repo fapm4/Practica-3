@@ -195,7 +195,7 @@ def main():
                 dropBD(conn)
                 createTables(conn)
             elif val == 1:
-                print('Esta parte es de Panchi\n')
+                print('Esta parte es de Pancho\n')
             elif val == 2:
                 gestionEntrenadores(conn)
             elif val == 3:
