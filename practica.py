@@ -10,9 +10,7 @@ from time import gmtime, strftime
 
 def conectaBase():
     try:
-        conn = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=oracle0.ugr.es;Service Name=practbd.oracle0.ugr.es;User ID=x7390452;Password=x7390452')
-        conn.autocommit = False
-        cursor = conn.cursor()
+        conn = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=oracle0.ugr.es;Service Name=practbd.oracle0.ugr.es;User ID=x8768206;Password=x8768206')
         
     except Exception as ex:
         print(ex)
@@ -55,7 +53,7 @@ def createTables(conn):
             APELLIDOS VARCHAR2(20),
             CORREO VARCHAR2(20),
             DIRECCION VARCHAR2(20),
-            TELEFONO NUMBER,
+            TELEFONO NUMBER(9),
             TIPO_SUSCRIPCION VARCHAR2(2),
             CONSTRAINT PPK_CLIENTES PRIMARY KEY (DNI),
             CONSTRAINT PUK_CLIENTES_CORREO UNIQUE (CORREO),
@@ -164,6 +162,7 @@ def aniadeEntrenador(conn):
 
 
 def gestionEntrenadores(conn):
+    print("#########################################################################")
     print('Gestión de Entrenadores\nPor favor indique la gestion a realizar\n')
     print('1. Añadir un nuevo entrenador\n')
     print('2. Borrar un entrenador\n')
@@ -171,6 +170,128 @@ def gestionEntrenadores(conn):
     print('4. Consultar el horario de un entrenador\n')
     print('5. Listado de todos los entrenadores\n')
     print('Introduce opción: ')
+
+def buscaCliente(conn, cli):
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT DNI FROM CLIENTES")
+    
+            existe = -1
+            
+            # Los recupero y los guardo
+            dataClientes = cursor.fetchall()
+
+            if len(dataClientes) != 0:
+                for prod in dataClientes:
+                    if cli is prod[0]:
+                        existe = 0   
+                
+    except Exception as ex:
+        print(ex)
+        
+    return existe
+
+def anadirCliente(conn):
+
+    print("DNI: ")
+    dniCliente = str(input())
+
+    # Vamos a buscar primero al cliente por su DNI en la tabla de CLIENTE
+    # Se tiene que cambiar por un trigger
+
+   
+    if buscaCliente(conn, dniCliente) == 0:
+        print("El cliente ya existe")
+    else:
+        print("Nombre: ")
+        nombreCliente = str(input())
+
+        print("Apellidos: ")
+        apellidosCliente = str(input())
+
+        print("Correo: ")
+        correoCliente = str(input())
+
+        print("Dirección: ")
+        direccionCliente = str(input())
+
+        print("Teléfono: ")
+        telefonoCliente = int(input())
+
+        print("Tipo de suscripcion: ")
+        suscripcionCliente = str(input())
+
+        
+        insertaCliente = """
+            INSERT INTO CLIENTES 
+            (DNI, NOMBRE, APELLIDOS, CORREO, DIRECCION, TELEFONO, TIPO_SUSCRIPCION) 
+            values ('%s', '%s', '%s', '%s', '%s', %i, '%s')
+        """%(dniCliente, nombreCliente, apellidosCliente, correoCliente,
+            direccionCliente, telefonoCliente, suscripcionCliente)
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(insertaCliente)
+                print(insertaCliente)
+                cursor.commit()
+        except Exception as ex:
+            print(ex)
+
+
+
+def borrarCliente():
+    print("hola")
+
+def modificarCliente():
+    print("hola")
+
+def gestionarSuscripcion():
+    print("hola")
+
+def apuntarAClase():
+    print("hola")
+
+def muestraClientes(conn):
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM CLIENTES")
+            dataClientes = cursor.fetchall()
+            if len(dataClientes) != 0:
+                for prod in dataClientes:
+                    print("DNI  NOMBRE APELLIDOS CORREO DIRECCION TELEFONO SUSCRIPCION")
+                    print("-----------------------------------------------------------------")
+                    print("""%s, %s, %s, %s, %s, %s, %s"""%(prod[0], prod[1], prod[2], prod[3], prod[4], prod[5], prod[6]))
+
+    except Exception as ex:
+        print(ex)
+
+
+def gestionClientes(conn):
+    print("#########################################################################")
+    val = 1
+    while(val >= 1 and val <= 4) and val != 6:
+        print('Gestión de Clientes\nPor favor indique la gestion a realizar\n')
+        print('1. Añadir un nuevo cliente\n')
+        print('2. Borrar un cliente\n')
+        print('3. Modificar datos de un cliente\n')
+        print('4. Gestionar la suscripción de un cliente\n')
+        print('5. Apuntar un cliente a una clase\n')
+        print('Introduce opción: ')
+        val = int(input())
+
+        if val == 1:
+            anadirCliente(conn)
+            conn.commit()
+        elif val == 2:
+            borrarCliente()
+        elif val == 3:
+            modificarCliente()
+        elif val == 4:
+            gestionarSuscripcion()
+        elif val == 5:
+            apuntarAClase()
+        
+        #muestraClientes(conn)
+
 
 def main():
     conn = conectaBase()
@@ -180,7 +301,7 @@ def main():
     
     val = 1
 
-    while (val >= 1 and val <= 4) and val != 5:
+    while (val >= 0 and val <= 4) and val != 5:
         print('0. Inicializar la base de datos\n')
         print('1. Gestión de Clientes\n')
         print('2. Gestión de Entrenadores\n')
@@ -195,7 +316,7 @@ def main():
                 dropBD(conn)
                 createTables(conn)
             elif val == 1:
-                print('Esta parte es de Panchi\n')
+                gestionClientes(conn)
             elif val == 2:
                 gestionEntrenadores(conn)
             elif val == 3:
