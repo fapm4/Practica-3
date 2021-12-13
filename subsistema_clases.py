@@ -26,7 +26,7 @@ def crear_clase(conn):
     id+=1
 
 
-    f = "TO_DATE('" + str(fecha.year) + "/" + str(fecha.month) + "/"+ atributos[1] + " " + atributos[2] +":00:00','YYYY/MM/DD HH24:MI:SS')"
+    f = "TO_DATE('" + str(fecha.year) + "/" + str(fecha.month) + "/"+ atributos[1] + " " + atributos[2] +":00','YYYY/MM/DD HH24:MI')"
     """
     v= "values ('" + str(id) +"','" + atributos[0] + "'," + f +"));"
     consulta = "INSERT INTO CLASE (id_clase,tematica,horario) " + v
