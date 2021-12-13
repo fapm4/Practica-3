@@ -245,11 +245,45 @@ def modificarCliente(conn):
 
 
 
-def gestionarSuscripcion():
-    print("hola")
+def gestionarSuscripcion(conn):
+    print("DNI: ")
+    dniCliente = str(input())
 
-def apuntarAClase():
-    print("hola")
+    # Trigger y check sobre suscripcion
+    if buscaCliente(conn, dniCliente) == 0:
+        print("Introduce el nuevo tipo de suscripción: ")
+        tipoSuscripcion = str(input())
+        sentencia = "UPDATE CLIENTES SET TIPO_SUSCRIPCION = \'" + tipoSuscripcion + "\' WHERE DNI = \'" + dniCliente + "\';"; 
+        print(sentencia)
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(sentencia)
+                cursor.commit()
+        except Exception as ex:
+            print(ex)
+    else:
+        print("El cliente no existe")
+
+
+def apuntarAClase(conn):
+    print("DNI: ")
+    dniCliente = str(input())
+
+    if buscaCliente(conn, dniCliente) == 0:
+        print("ID de la clase: ")
+        idClase = str(input())
+        # Buscar clase con trigger
+
+        sentencia = "INSERT INTO APUNTADO VALUES (\'" + dniCliente + "\', \'" + idClase + "\');"
+        print(sentencia)
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(sentencia)
+                cursor.commit()
+        except Exception as ex:
+            print(ex)
+    else:
+        print("El cliente no existe")
 
 def muestraClientes(conn):
     try:
@@ -290,9 +324,9 @@ def gestionClientes(conn):
         elif val == 3:
             modificarCliente(conn)
         elif val == 4:
-            gestionarSuscripcion()
+            gestionarSuscripcion(conn)
         elif val == 5:
-            apuntarAClase()
+            apuntarAClase(conn)
         elif val == 6:
             muestraClientes(conn)
 
