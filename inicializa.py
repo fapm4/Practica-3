@@ -30,24 +30,25 @@ def createTables(conn):
             TELEFONO NUMBER,
             ESPECIALIDAD VARCHAR2(40) CHECK (ESPECIALIDAD='Raqueta' OR ESPECIALIDAD='Equipo' OR ESPECIALIDAD='Personal') ,
             SALARIO NUMBER,
-            CONSTRAINT PK_CLIENTES PRIMARY KEY (DNI),
+            CONSTRAINT PK_ENTRENADORES PRIMARY KEY (DNI),
             CONSTRAINT UK_CLIENTES_CORREO UNIQUE (CORREO),
             CONSTRAINT UK_CLIENTES_TELEFONO UNIQUE (TELEFONO))'''
 
         with conn.cursor() as cursor: 
             cursor.execute(createEntrenadores)
 
-        createClientes = ''' CREATE TABLE CLIENTES(
+        createClientes = '''CREATE TABLE CLIENTES(
             DNI VARCHAR2(9),
             NOMBRE VARCHAR2(40),
             APELLIDOS VARCHAR2(40),
-            CORREO VARCHAR2(40),
+            CORREO VARCHAR2(60),
             DIRECCION VARCHAR2(40),
             TELEFONO NUMBER(9),
-            TIPO_SUSCRIPCION VARCHAR2(2),
+            TIPO_SUSCRIPCION VARCHAR2(9),
             CONSTRAINT PPK_CLIENTES PRIMARY KEY (DNI),
             CONSTRAINT PUK_CLIENTES_CORREO UNIQUE (CORREO),
-            CONSTRAINT PUK_CLIENTES_TELEFONO UNIQUE (TELEFONO))'''
+            CONSTRAINT PUK_CLIENTES_TELEFONO UNIQUE (TELEFONO),
+            CONSTRAINT CK_CLIENTES CHECK (TIPO_SUSCRIPCION IN ('NORMAL', 'MEDIO', 'PREMIUM')))'''
 
         with conn.cursor() as cursor: 
             cursor.execute(createClientes)
