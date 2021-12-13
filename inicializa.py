@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -39,18 +40,18 @@ def createTables(conn):
             cursor.execute(createEntrenadores)
             cursor.commit()
 
-        createClientes = ''' CREATE TABLE CLIENTES(
+        createClientes = '''CREATE TABLE CLIENTES(
             DNI VARCHAR2(9),
-            NOMBRE VARCHAR2(20),
-            APELLIDOS VARCHAR2(20),
+            NOMBRE VARCHAR2(40),
+            APELLIDOS VARCHAR2(40),
             CORREO VARCHAR2(60),
-            DIRECCION VARCHAR2(20),
-            TELEFONO NUMBER,
-            TIPO_SUSCRIPCION VARCHAR2(2),
+            DIRECCION VARCHAR2(40),
+            TELEFONO NUMBER(9),
+            TIPO_SUSCRIPCION VARCHAR2(9),
             CONSTRAINT PK_CLIENTES PRIMARY KEY (DNI),
             CONSTRAINT UK_CLIENTES_CORREO UNIQUE (CORREO),
-            CONSTRAINT UK_CLIENTES_TELEFONO UNIQUE (TELEFONO))
-        '''
+            CONSTRAINT UK_CLIENTES_TELEFONO UNIQUE (TELEFONO)),
+            CONSTRAINT CK_CLIENTES CHECK (TIPO_SUSCRIPCION IN ('NORMAL', 'MEDIO', 'PREMIUM')))'''
 
         with conn.cursor() as cursor: 
             cursor.execute(createClientes)
@@ -59,6 +60,7 @@ def createTables(conn):
         createInstalacion = ''' CREATE TABLE INSTALACION(
             id_instalacion VARCHAR2(9),
             aforo NUMBER,
+
             CONSTRAINT IPK_CLASE PRIMARY KEY(id_instalacion))
         '''
 
@@ -115,8 +117,6 @@ def createTables(conn):
 
     except Exception as ex:
         print(ex)
-
-#In [ ]:
 
 def dropBD(conn):
     tablas=["LUGAR", "IMPARTE", "APUNTADO", "RESERVA", "INSTALACION", "CLIENTES", "ENTRENADORES", "CLASE"]
