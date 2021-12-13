@@ -52,7 +52,6 @@ def main():
                 inicializa.dropBD(conn)
                 inicializa.createTables(conn)
             elif val == 1:
-
                  subsistema_clientes.gestionClientes(conn)
             elif val == 2:
                 subsistema_entrenadores.gestionEntrenadores(conn)
