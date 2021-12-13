@@ -22,43 +22,40 @@ def createTables(conn):
     try:
         createClase = ''' CREATE TABLE CLASE( 
             id_clase VARCHAR2(9),
-            tematica VARCHAR2(20), 
+            tematica VARCHAR2(40), 
             horario  DATE, 
-            CONSTRAINT PK_CLASE PRIMARY KEY(id_clase))
-        '''
+            CONSTRAINT PK_CLASE PRIMARY KEY(id_clase))'''
 
         with conn.cursor() as cursor: 
             cursor.execute(createClase)
 
         createEntrenadores = ''' CREATE TABLE ENTRENADORES(
             DNI VARCHAR2(9),
-            NOMBRE VARCHAR2(20),
-            APELLIDOS VARCHAR2(20),
-            CORREO VARCHAR2(20),
-            DIRECCION VARCHAR2(20),
+            NOMBRE VARCHAR2(40),
+            APELLIDOS VARCHAR2(40),
+            CORREO VARCHAR2(40),
+            DIRECCION VARCHAR2(40),
             TELEFONO NUMBER,
-            ESPECIALIDAD VARCHAR2(30) CHECK (ESPECIALIDAD='Raqueta' OR ESPECIALIDAD='Equipo' OR ESPECIALIDAD='Personal') ,
+            ESPECIALIDAD VARCHAR2(40) CHECK (ESPECIALIDAD='Raqueta' OR ESPECIALIDAD='Equipo' OR ESPECIALIDAD='Personal') ,
             SALARIO NUMBER,
             CONSTRAINT PK_CLIENTES PRIMARY KEY (DNI),
             CONSTRAINT UK_CLIENTES_CORREO UNIQUE (CORREO),
-            CONSTRAINT UK_CLIENTES_TELEFONO UNIQUE (TELEFONO))
-        '''
+            CONSTRAINT UK_CLIENTES_TELEFONO UNIQUE (TELEFONO))'''
 
         with conn.cursor() as cursor: 
             cursor.execute(createEntrenadores)
 
         createClientes = ''' CREATE TABLE CLIENTES(
             DNI VARCHAR2(9),
-            NOMBRE VARCHAR2(20),
-            APELLIDOS VARCHAR2(20),
-            CORREO VARCHAR2(20),
-            DIRECCION VARCHAR2(20),
+            NOMBRE VARCHAR2(40),
+            APELLIDOS VARCHAR2(40),
+            CORREO VARCHAR2(40),
+            DIRECCION VARCHAR2(40),
             TELEFONO NUMBER(9),
             TIPO_SUSCRIPCION VARCHAR2(2),
             CONSTRAINT PPK_CLIENTES PRIMARY KEY (DNI),
             CONSTRAINT PUK_CLIENTES_CORREO UNIQUE (CORREO),
-            CONSTRAINT PUK_CLIENTES_TELEFONO UNIQUE (TELEFONO))
-        '''
+            CONSTRAINT PUK_CLIENTES_TELEFONO UNIQUE (TELEFONO))'''
 
         with conn.cursor() as cursor: 
             cursor.execute(createClientes)
@@ -66,8 +63,7 @@ def createTables(conn):
         createInstalacion = ''' CREATE TABLE INSTALACION(
             id_instalacion VARCHAR2(9),
             aforo NUMBER,
-            CONSTRAINT IPK_CLASE PRIMARY KEY(id_instalacion))
-        '''
+            CONSTRAINT IPK_CLASE PRIMARY KEY(id_instalacion))'''
 
         with conn.cursor() as cursor: 
             cursor.execute(createInstalacion)
@@ -77,8 +73,7 @@ def createTables(conn):
             ID_INSTALACION VARCHAR2(9),
             FECHA DATE,
             CONSTRAINT PK_RESERVA PRIMARY KEY(DNI),
-            CONSTRAINT FK_RESERVA_INSTALACION FOREIGN KEY(ID_INSTALACION) REFERENCES INSTALACION)
-        '''
+            CONSTRAINT FK_RESERVA_INSTALACION FOREIGN KEY(ID_INSTALACION) REFERENCES INSTALACION)'''
 
         with conn.cursor() as cursor: 
             cursor.execute(createReserva)
@@ -87,8 +82,7 @@ def createTables(conn):
             DNI VARCHAR2(9),
             ID_CLASE VARCHAR2(9),
             CONSTRAINT PK_APUNTADO PRIMARY KEY(DNI),
-            CONSTRAINT FK_APUNTADO_CLASE FOREIGN KEY(ID_CLASE) REFERENCES CLASE)
-        '''
+            CONSTRAINT FK_APUNTADO_CLASE FOREIGN KEY(ID_CLASE) REFERENCES CLASE)'''
 
         with conn.cursor() as cursor: 
             cursor.execute(createApuntado)
@@ -98,8 +92,7 @@ def createTables(conn):
             id_clase VARCHAR2(9),
             CONSTRAINT EK_CLASEI FOREIGN KEY (id_clase) REFERENCES CLASE,
             CONSTRAINT EK_DNI FOREIGN KEY (DNI) REFERENCES ENTRENADORES,
-            CONSTRAINT PK_IMPARTE PRIMARY KEY(id_clase,DNI))
-        '''
+            CONSTRAINT PK_IMPARTE PRIMARY KEY(id_clase,DNI))'''
 
         with conn.cursor() as cursor: 
             cursor.execute(createImparte)
@@ -109,8 +102,7 @@ def createTables(conn):
             id_clase VARCHAR2(9),
             CONSTRAINT EK_CLASEL FOREIGN KEY (id_clase) REFERENCES CLASE,
             CONSTRAINT EK_INSTALACION FOREIGN KEY (id_instalacion) REFERENCES INSTALACION,
-            CONSTRAINT PK_LUGAR PRIMARY KEY(id_clase,id_instalacion))
-        '''
+            CONSTRAINT PK_LUGAR PRIMARY KEY(id_clase,id_instalacion))'''
 
         with conn.cursor() as cursor: 
             cursor.execute(createLugar)
@@ -135,42 +127,10 @@ def dropBD(conn):
                 cursor.rollback()
         i+=1
 
-def aniadeEntrenador(conn):
-    try:
-        print("\nIntroduzca el DNI del nuevo entrenador\n")
-        dni=str(input())
-        print("\nIntroduzca el nombre del nuevo entrenador\n")
-        nombre=str(input())
-        print("\nIntroduzca los apellidos del nuevo entrenador\n")
-        apellidos=str(input())
-        print("\nIntroduzca el correo del nuevo entrenador\n")
-        correo_e=str(input())
-        print("\nIntroduzca el nombre del nuevo entrenador\n")
-        n_telefono=int(input())
-        print("\nIntroduzca el nombre del nuevo entrenador\n")
-        especialidad=str(input())
-
-        with conn.cursor() as cursor: 
-                consulta = "INSERT INTO ENTRENADORES (DNI, NOMBRE, APELLIDOS, CORREO, TELEFONO, ESPECIALIDAD) values (" + dni + "," + nombre + "," + apellidos + ")";1
-                cursor.execute(consulta)
-
-    except Exception as ex:
-            print(ex)
-            
-            with conn.cursor() as cursor:
-                cursor.rollback()
-
-
 def gestionEntrenadores(conn):
-    print("#########################################################################")
-    print('Gestión de Entrenadores\nPor favor indique la gestion a realizar\n')
-    print('1. Añadir un nuevo entrenador\n')
-    print('2. Borrar un entrenador\n')
-    print('3. Calcular el salario de un entrenador\n')
-    print('4. Consultar el horario de un entrenador\n')
-    print('5. Listado de todos los entrenadores\n')
-    print('Introduce opción: ')
+    caca = "hola"
 
+#########################################################################################################################3
 def buscaCliente(conn, cli):
     try:
         with conn.cursor() as cursor:
@@ -183,13 +143,39 @@ def buscaCliente(conn, cli):
 
             if len(dataClientes) != 0:
                 for prod in dataClientes:
-                    if cli is prod[0]:
+                    #print(prod[0])
+                    if cli is prod[0] or cli == prod[0]:
                         existe = 0   
                 
     except Exception as ex:
         print(ex)
         
     return existe
+
+def pedirDatosCliente(nuevo):
+
+    print("Nombre: ")
+    nombre = str(input())
+
+    print("Apellidos: ")
+    apellidos = str(input())
+
+    print("Correo: ")
+    correo = str(input())
+
+    print("Dirección: ")
+    direccion = str(input())
+
+    print("Teléfono: ")
+    telefono = int(input())
+
+    if nuevo:
+        print("Tipo de suscripcion: ")
+        suscripcion = str(input())
+
+    else:
+        suscripcion = ""
+    return nombre, apellidos, correo, direccion, telefono, suscripcion
 
 def anadirCliente(conn):
 
@@ -199,28 +185,11 @@ def anadirCliente(conn):
     # Vamos a buscar primero al cliente por su DNI en la tabla de CLIENTE
     # Se tiene que cambiar por un trigger
 
-   
     if buscaCliente(conn, dniCliente) == 0:
         print("El cliente ya existe")
     else:
-        print("Nombre: ")
-        nombreCliente = str(input())
 
-        print("Apellidos: ")
-        apellidosCliente = str(input())
-
-        print("Correo: ")
-        correoCliente = str(input())
-
-        print("Dirección: ")
-        direccionCliente = str(input())
-
-        print("Teléfono: ")
-        telefonoCliente = int(input())
-
-        print("Tipo de suscripcion: ")
-        suscripcionCliente = str(input())
-
+        nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente = pedirDatosCliente(True)
         
         insertaCliente = """
             INSERT INTO CLIENTES 
@@ -238,11 +207,43 @@ def anadirCliente(conn):
 
 
 
-def borrarCliente():
-    print("hola")
+def borrarCliente(conn):
+    print("DNI: ")
+    dniCliente = str(input())
 
-def modificarCliente():
-    print("hola")
+    # Vamos a buscar primero al cliente por su DNI en la tabla de CLIENTE
+    # Se tiene que cambiar por un trigger
+
+    if buscaCliente(conn, dniCliente) == 0:
+        sentencia = "DELETE FROM CLIENTES WHERE DNI = '" + dniCliente + "'";
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(sentencia)
+                cursor.commit()
+        except Exception as ex:
+            print(ex)
+    else:
+        print("El cliente no existe")
+
+def modificarCliente(conn):
+
+    print("DNI: ")
+    dniCliente = str(input())
+
+    if buscaCliente(conn, dniCliente) == 0:
+        nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente = pedirDatosCliente(False)
+        sentencia = "UPDATE CLIENTES SET TELEFONO = " + str(telefonoCliente) + ", NOMBRE = \'" + nombreCliente + "\', APELLIDOS = \'" + apellidosCliente + "\', CORREO = \'" + correoCliente + "\', DIRECCION = \'" + direccionCliente + "\' WHERE DNI = \'" + dniCliente + "\';"; 
+        print(sentencia)
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(sentencia)
+                cursor.commit()
+        except Exception as ex:
+            print(ex)
+    else:
+        print("El cliente no existe")
+
+
 
 def gestionarSuscripcion():
     print("hola")
@@ -257,9 +258,12 @@ def muestraClientes(conn):
             dataClientes = cursor.fetchall()
             if len(dataClientes) != 0:
                 for prod in dataClientes:
-                    print("DNI  NOMBRE APELLIDOS CORREO DIRECCION TELEFONO SUSCRIPCION")
-                    print("-----------------------------------------------------------------")
+                    print("DNI  NOMBRE  APELLIDOS  CORREO  DIRECCION  TELEFONO SUSCRIPCION")
                     print("""%s, %s, %s, %s, %s, %s, %s"""%(prod[0], prod[1], prod[2], prod[3], prod[4], prod[5], prod[6]))
+
+            else:
+                print("No hay información de clientes aún")
+            
 
     except Exception as ex:
         print(ex)
@@ -268,29 +272,29 @@ def muestraClientes(conn):
 def gestionClientes(conn):
     print("#########################################################################")
     val = 1
-    while(val >= 1 and val <= 4) and val != 6:
+    while(val >= 1 and val <= 4) and val != 7:
         print('Gestión de Clientes\nPor favor indique la gestion a realizar\n')
         print('1. Añadir un nuevo cliente\n')
         print('2. Borrar un cliente\n')
         print('3. Modificar datos de un cliente\n')
         print('4. Gestionar la suscripción de un cliente\n')
         print('5. Apuntar un cliente a una clase\n')
+        print('6. Mostrar datos de los clientes\n')
         print('Introduce opción: ')
         val = int(input())
 
         if val == 1:
             anadirCliente(conn)
-            conn.commit()
         elif val == 2:
-            borrarCliente()
+            borrarCliente(conn)
         elif val == 3:
-            modificarCliente()
+            modificarCliente(conn)
         elif val == 4:
             gestionarSuscripcion()
         elif val == 5:
             apuntarAClase()
-        
-        #muestraClientes(conn)
+        elif val == 6:
+            muestraClientes(conn)
 
 
 def main():
