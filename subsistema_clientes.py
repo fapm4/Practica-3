@@ -50,6 +50,7 @@ def pedirDatosCliente(nuevo):
     else:
         p = 5
 
+    print("mecagoentumadre")
     for i in range(0, p):
         print(campos[i])
 
@@ -58,7 +59,7 @@ def pedirDatosCliente(nuevo):
             aux = str(input())
 
             if campoVacio(aux):
-                print("No se admiten campos vacios, por favor introduzca los datos correspondientes")
+                print("No se admiten campos vacios.\nPor favor introduzca el campo %s con el dato correspondiente"%(campos[i]))
         
             else:
                 val[i]= aux
@@ -90,6 +91,8 @@ def anadirCliente(conn):
             values ('%s', '%s', '%s', '%s', '%s', %i, '%s')
         """%(dniCliente, nombreCliente, apellidosCliente, correoCliente,
             direccionCliente, int(telefonoCliente), suscripcionCliente)
+
+        #print(insertaCliente)
         try:
             with conn.cursor() as cursor:
                 cursor.execute(insertaCliente)
@@ -172,6 +175,7 @@ def apuntarAClase(conn):
     dniCliente = str(input())
 
     # Comprobar aforo clase con trigger
+    # y número de clases
     if buscaCliente(conn, dniCliente) == 0:
         print("ID de la clase: ")
         idClase = str(input())
@@ -212,7 +216,7 @@ def gestionClientes(conn):
         print('Gestión de Clientes\nPor favor indique la gestion a realizar\n')
         print('1. Añadir un nuevo cliente\n')
         print('2. Borrar un cliente\n')
-        print('3. Modificar datos de un c7liente\n')
+        print('3. Modificar datos de un cliente\n')
         print('4. Gestionar la suscripción de un cliente\n')
         print('5. Apuntar un cliente a una clase\n')
         print('6. Mostrar datos de los clientes\n')

@@ -8,7 +8,6 @@
 import pyodbc
 import inicializa
 import subsistema_entrenadores
-import subsistema_clases
 import subsistema_clientes
 import os
 
@@ -17,7 +16,7 @@ from time import gmtime, strftime
 def conectaBase():
     try:
 
-        conn = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=oracle0.ugr.es;Service Name=practbd.oracle0.ugr.es;User ID=x7390452;Password=x7390452')
+        conn = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=oracle0.ugr.es;Service Name=practbd.oracle0.ugr.es;User ID=x8768206;Password=x8768206')
 
         conn.autocommit = False
         cursor = conn.cursor()
@@ -57,7 +56,7 @@ def main():
             elif val == 2:
                 subsistema_entrenadores.gestionEntrenadores(conn)
             elif val == 3:
-                subsistema_clases.gestionClases(conn)
+                print('Esta parte es de Jose\n')
             elif val == 4:
                 print('Esta parte es de Fjorn\n')
         else:
