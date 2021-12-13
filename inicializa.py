@@ -25,14 +25,14 @@ def createTables(conn):
             DNI VARCHAR2(9),
             NOMBRE VARCHAR2(40),
             APELLIDOS VARCHAR2(40),
-            CORREO VARCHAR2(40),
-            DIRECCION VARCHAR2(40),
+            CORREO VARCHAR2(60),
+            DIRECCION VARCHAR2(60),
             TELEFONO NUMBER,
             ESPECIALIDAD VARCHAR2(40) CHECK (ESPECIALIDAD='Raqueta' OR ESPECIALIDAD='Equipo' OR ESPECIALIDAD='Personal') ,
-            SALARIO NUMBER,
+            SALARIO NUMBER DEFAULT 0,
             CONSTRAINT PK_ENTRENADORES PRIMARY KEY (DNI),
-            CONSTRAINT UK_CLIENTES_CORREO UNIQUE (CORREO),
-            CONSTRAINT UK_CLIENTES_TELEFONO UNIQUE (TELEFONO))'''
+            CONSTRAINT UK_ENTRENADORES_CORREO UNIQUE (CORREO),
+            CONSTRAINT UK_ENTRENADORES_TELEFONO UNIQUE (TELEFONO))'''
 
         with conn.cursor() as cursor: 
             cursor.execute(createEntrenadores)
