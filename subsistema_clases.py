@@ -1,6 +1,10 @@
 from datetime import date
 from subsitema_entrenadores import muestraEntrenadores
+from subsistema_instalacion import mostrar_instalacion
+
+# from subsistema_instalacion import muestraInstalacion
 import pyodbc
+import os
 
 
 def max_id(conn):
@@ -32,7 +36,6 @@ def crear_clase(conn):
     consulta = "INSERT INTO CLASE (id_clase,tematica,horario) " + v
     """
     consulta = "INSERT INTO CLASE (id_clase,tematica,horario)  values ('%s','%s',%s)"%(id,atributos[0],f)
-    print(consulta)
 
     try:
         cursor.execute(consulta)
@@ -41,12 +44,9 @@ def crear_clase(conn):
         print(ex)
         cursor.rollback()
 
-    return atributos
-
 
 def borrar_clase(conn):
     mid = max_id(conn)
-    print(mid)
     cursor = conn.cursor()
 
     if(mid != -1):
@@ -113,22 +113,20 @@ def asignar_entrenador(conn):
 
         print("\nEntrenadores.\n")
         muestraEntrenadores(conn)
-        dni = input("Introduzca el DNI del entrenado que desea asignar a esa clase.")
+        dni = input("Introduzca el DNI del entrenado que desea asignar a esa clase: ")
 
         consulta = "INSERT INTO IMPARTE(DNI,ID_CLASE) values('%s','%s')"%(dni,id)
         try:
             cursor.execute(consulta)
             cursor.commit()
         except Exception as ex:
-            print(ex)
+            print("Los datos introducidos no son correctos.")
             cursor.rollback()
         
 
     else:
         print("No hay clases disponibles.")
-        print("Las clases disponibles son: \n")
-        mostrar_clases(conn)
-        id = int(input("Introduzca el ID de la clase a la que quieras añadirle el entrenador: "))
+    
 
 
 def asignar_instalacion(conn):
@@ -138,27 +136,34 @@ def asignar_instalacion(conn):
         cursor = conn.cursor()
         print("Las clases disponibles son: \n")
         mostrar_clases(conn)
-        id = int(input("Introduzca el ID de la clase a la que quieras añadirle el entrenador: "))
+        id = int(input("Introduzca el ID de la clase a la que quieras añadirle la instalacion: "))
+        mostrar_instalacion(conn)
+
+        id_i = input("Introduzca el ID de la instalación que va a asignar: ")
 
 
-    
+        consulta = "INSERT INTO LUGAR(ID_INSTALACION,ID_CLASE) values('%s','%s')"%(id_i,id)
+        try:
+            cursor.execute(consulta)
+            cursor.commit()
+        except Exception as ex:
+            print("Los datos introducidos no son correctos.")
+            cursor.rollback()
+             
 
 
-    
     
 def gestionClases(conn):
-    id = -1
     opcion = 0
     while 0<= opcion <=5:
-        id+=1
         print("1. Crear una clase.")
         print("2. Borrar clases.")
         print("3. Mostrar clases.")
         print("4. Asignar entrenador a la clase.")
         print("5. Asignar instalación a la clase.")
         print("6. Para salir.")
-        opcion =int(input("\nElija una opción: "))
-
+        opcion =int(input("\nElija una opción: \n"))
+        os.system('cls' if os.name == 'nt' else 'clear')
         if(opcion == 1):
             crear_clase(conn)
         elif(opcion ==2):
@@ -168,4 +173,4 @@ def gestionClases(conn):
         elif(opcion==4):
             asignar_entrenador(conn)
         elif(opcion==5):
-            asignar_entrenador(conn)
+            asignar_instalacion(conn)

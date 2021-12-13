@@ -8,7 +8,9 @@
 import pyodbc
 import subsistema_clases
 import subsitema_entrenadores
+import subsistema_instalacion
 import inicializa
+import os
 from time import gmtime, strftime
 
 
@@ -42,6 +44,7 @@ def main():
         print('5. Salir (sin confirmar cambios)\n')
         print('Introduce opción: ')
         val = int(input())
+        os.system('cls' if os.name == 'nt' else 'clear')
         
         if val != 5:
             if val == 0:
@@ -54,7 +57,7 @@ def main():
             elif val == 3:
                 subsistema_clases.gestionClases(conn)
             elif val == 4:
-                print('Esta parte es de Fjorn\n')
+                subsistema_instalacion.gestionInstalacion(conn)
         else:
             with conn.cursor() as cursor:
                 cursor.rollback()
