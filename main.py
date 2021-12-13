@@ -7,6 +7,7 @@
 import pyodbc
 import inicializa
 import subsistema_clientes
+import os
 
 from time import gmtime, strftime
 
@@ -38,6 +39,7 @@ def main():
         print('5. Salir\n')
         print('Introduce opción: ')
         val = int(input())
+        os.system("cls")
         
         if val != 5:
             if val == 0:

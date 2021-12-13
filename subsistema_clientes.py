@@ -6,6 +6,7 @@
 # In[ ]:
 
 import pyodbc
+import os
 import inicializa
 from time import gmtime, strftime
 
@@ -42,7 +43,7 @@ def campoVacio(campo):
 def pedirDatosCliente(nuevo):
 
     campos = ["Nombre: ", "Apellidos: ", "Correo: ", "Dirección: ", "Telefono: ", "Tipo de Suscripción: "]
-    val = []
+    val = ["", "", "", "", "", ""]
 
     if nuevo:
         p = 6
@@ -52,13 +53,16 @@ def pedirDatosCliente(nuevo):
     for i in range(0, p):
         print(campos[i])
 
-        aux = str(input())
+        aux = ""
+        while(campoVacio(aux)):
+            aux = str(input())
 
-        if campoVacio(aux):
-            print("No se admiten campos vacios, por favor introduzca los datos correspondientes")
+            if campoVacio(aux):
+                print("No se admiten campos vacios, por favor introduzca los datos correspondientes")
         
-        else:
-            val.append(aux)
+            else:
+                val[i]= aux
+
 
     return val
 
@@ -94,8 +98,6 @@ def anadirCliente(conn):
         except Exception as ex:
             print(ex)
 
-
-
 def borrarCliente(conn):
     print("DNI: ")
     dniCliente = str(input())
@@ -104,7 +106,9 @@ def borrarCliente(conn):
     # Se tiene que cambiar por un trigger
 
     if buscaCliente(conn, dniCliente) == 0:
-        sentencia = "DELETE FROM CLIENTES WHERE DNI = '" + dniCliente + "'";
+        sentencia = """
+        DELETE FROM CLIENTES WHERE DNI = '%s'
+        """%(dniCliente);
         try:
             with conn.cursor() as cursor:
                 cursor.execute(sentencia)
@@ -123,8 +127,13 @@ def modificarCliente(conn):
 
     if buscaCliente(conn, dniCliente) == 0:
         nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente = pedirDatosCliente(False)
-        sentencia = "UPDATE CLIENTES SET TELEFONO = " + str(telefonoCliente) + ", NOMBRE = \'" + nombreCliente + "\', APELLIDOS = \'" + apellidosCliente + "\', CORREO = \'" + correoCliente + "\', DIRECCION = \'" + direccionCliente + "\' WHERE DNI = \'" + dniCliente + "\';"; 
-        print(sentencia)
+        sentencia = """
+        UPDATE CLIENTES 
+        SET TELEFONO = '%s', NOMBRE = '%s', APELLIDOS = '%s', 
+        CORREO = '%s', DIRECCION = '%s' WHERE DNI = '%s';
+        """%(nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, dniCliente)
+        
+        #print(sentencia)
         try:
             with conn.cursor() as cursor:
                 cursor.execute(sentencia)
@@ -144,8 +153,10 @@ def gestionarSuscripcion(conn):
     if buscaCliente(conn, dniCliente) == 0:
         print("Introduce el nuevo tipo de suscripción: ")
         tipoSuscripcion = str(input())
-        sentencia = "UPDATE CLIENTES SET TIPO_SUSCRIPCION = \'" + tipoSuscripcion + "\' WHERE DNI = \'" + dniCliente + "\';"; 
-        print(sentencia)
+        sentencia = """
+        UPDATE CLIENTES SET TIPO_SUSCRIPCION = '%s' WHERE DNI = '%s';
+        """%(tipoSuscripcion, dniCliente)
+        #print(sentencia)
         try:
             with conn.cursor() as cursor:
                 cursor.execute(sentencia)
@@ -196,13 +207,12 @@ def muestraClientes(conn):
 
 
 def gestionClientes(conn):
-    print("#########################################################################")
     val = 1
-    while(val >= 1 and val <= 4) and val != 7:
+    while(val >= 1 and val <= 6) and val != 7:
         print('Gestión de Clientes\nPor favor indique la gestion a realizar\n')
         print('1. Añadir un nuevo cliente\n')
         print('2. Borrar un cliente\n')
-        print('3. Modificar datos de un cliente\n')
+        print('3. Modificar datos de un c7liente\n')
         print('4. Gestionar la suscripción de un cliente\n')
         print('5. Apuntar un cliente a una clase\n')
         print('6. Mostrar datos de los clientes\n')
