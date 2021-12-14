@@ -52,7 +52,7 @@ def aniadeEntrenador(conn):
         n_telefono=int(input())
 
         espe=15
-        while 0 > espe > 3:
+        while not (0 < espe < 4):
             print("Introduzca la especialidad del nuevo entrenador\n")
             print("1. Raqueta\n")
             print("2. Equipo\n")

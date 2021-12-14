@@ -9,16 +9,14 @@ import pyodbc
 import inicializa
 import subsistema_entrenadores
 import subsistema_clases
-import subsistema_clientes
+
 import os
 
 from time import gmtime, strftime
 
 def conectaBase():
     try:
-
         conn = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=oracle0.ugr.es;Service Name=practbd.oracle0.ugr.es;User ID=x7390452;Password=x7390452')
-
         conn.autocommit = False
         cursor = conn.cursor()
         
@@ -36,7 +34,6 @@ def main():
     val = 1
 
     while val != 5:
-
         print('0. Inicializar la base de datos\n')
         print('1. Gestión de Clientes\n')
         print('2. Gestión de Entrenadores\n')
@@ -45,14 +42,14 @@ def main():
         print('5. Salir\n')
         print('Introduce opción: ')
         val = int(input())
-
+        
         os.system('cls' if os.name == 'nt' else 'clear')
         if val != 5:
             if val == 0:
                 inicializa.dropBD(conn)
                 inicializa.createTables(conn)
             elif val == 1:
-                 subsistema_clientes.gestionClientes(conn)
+                print('Esta parte es de Pancho\n')
             elif val == 2:
                 subsistema_entrenadores.gestionEntrenadores(conn)
             elif val == 3:
