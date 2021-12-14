@@ -1,12 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# Practica 3
-
-# In[ ]:
-
-import pyodbc
-
 def createTables(conn):
 
     try:
@@ -19,14 +10,13 @@ def createTables(conn):
 
         with conn.cursor() as cursor: 
             cursor.execute(createClase)
-            cursor.commit()
 
         createEntrenadores = ''' CREATE TABLE ENTRENADORES(
             DNI VARCHAR2(9),
             NOMBRE VARCHAR2(20),
             APELLIDOS VARCHAR2(20),
-            CORREO VARCHAR2(60),
-            DIRECCION VARCHAR2(60),
+            CORREO VARCHAR2(20),
+            DIRECCION VARCHAR2(20),
             TELEFONO NUMBER,
             ESPECIALIDAD VARCHAR2(30) CHECK (ESPECIALIDAD='Raqueta' OR ESPECIALIDAD='Equipo' OR ESPECIALIDAD='Personal') ,
             SALARIO NUMBER DEFAULT 0,
@@ -37,13 +27,12 @@ def createTables(conn):
 
         with conn.cursor() as cursor: 
             cursor.execute(createEntrenadores)
-            cursor.commit()
 
         createClientes = ''' CREATE TABLE CLIENTES(
             DNI VARCHAR2(9),
             NOMBRE VARCHAR2(20),
             APELLIDOS VARCHAR2(20),
-            CORREO VARCHAR2(60),
+            CORREO VARCHAR2(20),
             DIRECCION VARCHAR2(20),
             TELEFONO NUMBER,
             TIPO_SUSCRIPCION VARCHAR2(2),
@@ -54,7 +43,6 @@ def createTables(conn):
 
         with conn.cursor() as cursor: 
             cursor.execute(createClientes)
-            cursor.commit()
 
         createInstalacion = ''' CREATE TABLE INSTALACION(
             id_instalacion VARCHAR2(9),
@@ -64,7 +52,6 @@ def createTables(conn):
 
         with conn.cursor() as cursor: 
             cursor.execute(createInstalacion)
-            cursor.commit()
 
         createReserva = ''' CREATE TABLE RESERVA(
             DNI VARCHAR2(9),
@@ -76,7 +63,6 @@ def createTables(conn):
 
         with conn.cursor() as cursor: 
             cursor.execute(createReserva)
-            cursor.commit()
         
         createApuntado = ''' CREATE TABLE APUNTADO(
             DNI VARCHAR2(9),
@@ -87,41 +73,94 @@ def createTables(conn):
 
         with conn.cursor() as cursor: 
             cursor.execute(createApuntado)
-            cursor.commit()
 
         createImparte = ''' CREATE TABLE IMPARTE(
             DNI VARCHAR2(9),
             id_clase VARCHAR2(9),
-            CONSTRAINT EK_CLASEI FOREIGN KEY (id_clase) REFERENCES CLASE,
-            CONSTRAINT EK_DNI FOREIGN KEY (DNI) REFERENCES ENTRENADORES,
-            CONSTRAINT PK_IMPARTE PRIMARY KEY(id_clase,DNI))
+            CONSTRAINT EK_CLASEI FOREIGN KEY (DNI) REFERENCES ENTRENADORES (DNI)  ON DELETE CASCADE,
+            CONSTRAINT EK_DNI FOREIGN KEY (id_clase) REFERENCES CLASE (id_clase)  ON DELETE CASCADE,
+            CONSTRAINT PK_IMPARTE PRIMARY KEY(id_clase,DNI)
+            )
         '''
 
         with conn.cursor() as cursor: 
             cursor.execute(createImparte)
-            cursor.commit()
 
         createLugar = ''' CREATE TABLE LUGAR(
             id_instalacion VARCHAR2(9),
             id_clase VARCHAR2(9),
-            CONSTRAINT EK_CLASEL FOREIGN KEY (id_clase) REFERENCES CLASE,
-            CONSTRAINT EK_INSTALACION FOREIGN KEY (id_instalacion) REFERENCES INSTALACION,
-            CONSTRAINT PK_LUGAR PRIMARY KEY(id_clase,id_instalacion))
+            CONSTRAINT EK_CLASEL FOREIGN KEY (id_clase) REFERENCES CLASE (id_clase) ON DELETE CASCADE,
+            CONSTRAINT EK_INSTALACION FOREIGN KEY (id_instalacion) REFERENCES INSTALACION (id_instalacion) ON DELETE CASCADE,
+            CONSTRAINT PK_LUGAR PRIMARY KEY(id_clase,id_instalacion)
+            )
         '''
 
         with conn.cursor() as cursor: 
             cursor.execute(createLugar)
+
+        # Triggers
+        triggerInstalacion =  """
+                    create or replace trigger NO_OCUPADA
+                    before insert 
+                    ON LUGAR
+                    FOR EACH ROW
+
+                    DECLARE 
+                        v_horario_instalacion  clase.horario%TYPE;
+                        fechaAux clase.horario%TYPE;
+
+                            
+                    BEGIN
+                        select horario INTO fechaAux from clase where id_clase=:new.id_clase;
+
+                        FOR I IN(SELECT * FROM LUGAR WHERE id_instalacion=:new.id_instalacion)
+                            LOOP
+                            SELECT HORARIO into v_horario_instalacion FROM CLASE WHERE id_clase=I.id_clase;
+                            IF (v_horario_instalacion=fechaAux) then
+                                    raise_application_error(-20600,:new.id_instalacion ||' La instalación está ocupada a la en el horario de esa clase.'); 
+                            END IF;
+                            END LOOP;
+                    END;
+                    """
+        with conn.cursor() as cursor: 
+            cursor.execute(triggerInstalacion)
+        triggerEntrenador = """
+                        create or replace trigger NO_OCUPADA
+                        before insert 
+                        ON LUGAR
+                        FOR EACH ROW
+
+                        DECLARE 
+                            v_horario_instalacion  clase.horario%TYPE;
+                            fechaAux clase.horario%TYPE;
+
+                                
+                        BEGIN
+                            select horario INTO fechaAux from clase where id_clase=:new.id_clase;
+
+                            FOR I IN(SELECT * FROM LUGAR WHERE id_instalacion=:new.id_instalacion)
+                                LOOP
+                                SELECT HORARIO into v_horario_instalacion FROM CLASE WHERE id_clase=I.id_clase;
+                                IF (v_horario_instalacion=fechaAux) then
+                                        raise_application_error(-20600,:new.id_instalacion ||' La instalación está ocupada a la en el horario de esa clase.'); 
+                                END IF;
+                                END LOOP;
+                        END;
+                        """
+
+        with conn.cursor() as cursor: 
             cursor.commit()
+                
+        with conn.cursor() as cursor: 
+            cursor.execute(triggerEntrenador)
 
     except Exception as ex:
         print(ex)
 
-#In [ ]:
-
 def dropBD(conn):
     tablas=["LUGAR", "IMPARTE", "APUNTADO", "RESERVA", "INSTALACION", "CLIENTES", "ENTRENADORES", "CLASE"]
     i=0
-    while i < 8:        
+    while i < len(tablas):        
         try:
             vaciado = "DROP TABLE " + tablas[i]
 
