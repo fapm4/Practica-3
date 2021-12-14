@@ -7,8 +7,10 @@
 
 import pyodbc
 import inicializa
+import subsistema_clientes
 import subsistema_entrenadores
 import subsistema_clases
+import subsitema_instalaciones
 
 import os
 
@@ -49,13 +51,13 @@ def main():
                 inicializa.dropBD(conn)
                 inicializa.createTables(conn)
             elif val == 1:
-                print('Esta parte es de Pancho\n')
+                subsitema_clientes.gestionClientes(conn)
             elif val == 2:
                 subsistema_entrenadores.gestionEntrenadores(conn)
             elif val == 3:
                 subsistema_clases.gestionClases(conn)
             elif val == 4:
-                print('Esta parte es de Fjorn\n')
+                subsistema_instalaciones.gestionInstalaciones(conn)
         else:
             with conn.cursor() as cursor:
                 cursor.rollback()
