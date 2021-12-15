@@ -10,7 +10,7 @@ import inicializa
 import subsistema_clientes
 import subsistema_entrenadores
 import subsistema_clases
-import subsitema_instalaciones
+import subsistema_instalacion
 
 import os
 
@@ -57,7 +57,7 @@ def main():
             elif val == 3:
                 subsistema_clases.gestionClases(conn)
             elif val == 4:
-                subsistema_instalaciones.gestionInstalaciones(conn)
+                subsistema_instalacion.gestionInstalacion(conn)
         else:
             with conn.cursor() as cursor:
                 cursor.rollback()

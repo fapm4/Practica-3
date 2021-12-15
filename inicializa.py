@@ -134,6 +134,86 @@ def createTables(conn):
             cursor.execute(createLugar)
             cursor.commit()
 
+        # Triggers
+
+        triggerInstalacion =  """
+            create or replace trigger NO_OCUPADA
+            before insert 
+            ON LUGAR
+            FOR EACH ROW
+
+            DECLARE 
+                v_horario_instalacion  clase.horario%TYPE;
+                fechaAux clase.horario%TYPE;
+
+                    
+            BEGIN
+                select horario INTO fechaAux from clase where id_clase=:new.id_clase;
+
+                FOR I IN(SELECT * FROM LUGAR WHERE id_instalacion=:new.id_instalacion)
+                    LOOP
+                    SELECT HORARIO into v_horario_instalacion FROM CLASE WHERE id_clase=I.id_clase;
+                    IF (v_horario_instalacion=fechaAux) then
+                            raise_application_error(-20600,:new.id_instalacion ||' La instalación está ocupada a la en el horario de esa clase.'); 
+                    END IF;
+                    END LOOP;
+            END;
+        """
+
+        with conn.cursor() as cursor: 
+            cursor.execute(triggerInstalacion)
+
+        triggerEntrenador = """
+            create or replace trigger NO_OCUPADA
+            before insert 
+            ON LUGAR
+            FOR EACH ROW
+
+            DECLARE 
+                v_horario_instalacion  clase.horario%TYPE;
+                fechaAux clase.horario%TYPE;
+
+                    
+            BEGIN
+                select horario INTO fechaAux from clase where id_clase=:new.id_clase;
+
+                FOR I IN(SELECT * FROM LUGAR WHERE id_instalacion=:new.id_instalacion)
+                    LOOP
+                    SELECT HORARIO into v_horario_instalacion FROM CLASE WHERE id_clase=I.id_clase;
+                    IF (v_horario_instalacion=fechaAux) then
+                            raise_application_error(-20600,:new.id_instalacion ||' La instalación está ocupada a la en el horario de esa clase.'); 
+                    END IF;
+                    END LOOP;
+            END;
+        """
+
+        trigger_entrenadores='''
+            CREATE OR REPLACE TRIGGER existe
+            BEFORE INSERT ON ENTRENADORES
+            FOR EACH ROW 
+            DECLARE
+                cuantos NUMBER(1):=0;
+                aux_dni ENTRENADORES.DNI%TYPE;
+            BEGIN
+                SELECT COUNT(*) INTO cuantos FROM ENTRENADORES
+                WHERE DNI = :new.DNI;
+                IF (cuantos>0) THEN
+                    SELECT DNI INTO aux_dni FROM ENTRENADORES WHERE DNI=:NEW.DNI;
+                    RAISE_APPLICATION_ERROR(-20601,aux_dni||' ese DNI ya existe en la base de datos');
+                END IF;
+            END;
+        '''
+
+        with conn.cursor() as cursor: 
+            cursor.execute(trigger_entrenadores)
+            cursor.commit()
+
+        with conn.cursor() as cursor: 
+            cursor.commit()
+                
+        with conn.cursor() as cursor: 
+            cursor.execute(triggerEntrenador)
+
     except Exception as ex:
         print(ex)
 
