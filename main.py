@@ -9,6 +9,7 @@ import pyodbc
 import inicializa
 import subsistema_entrenadores
 import subsistema_clientes
+import subsistema_clases
 import os
 
 from time import gmtime, strftime
@@ -35,7 +36,8 @@ def main():
     val = 1
 
     while (val >= 0 and val <= 4) and val != 5:
-
+        savepointFromMain = "SAVEPOINT savepointFromMain"
+        conn.execute(savepointFromMain)
         print('0. Inicializar la base de datos\n')
         print('1. Gestión de Clientes\n')
         print('2. Gestión de Entrenadores\n')
@@ -51,18 +53,18 @@ def main():
                 inicializa.dropBD(conn)
                 inicializa.createTables(conn)
             elif val == 1:
-
                  subsistema_clientes.gestionClientes(conn)
             elif val == 2:
                 subsistema_entrenadores.gestionEntrenadores(conn)
             elif val == 3:
-                print('Esta parte es de Jose\n')
+                subsistema_clases.gestionClases(conn)
             elif val == 4:
                 print('Esta parte es de Fjorn\n')
         else:
             with conn.cursor() as cursor:
                 cursor.rollback()
 
+    conn.commit()
     conn.close()
 
 main()

@@ -42,7 +42,7 @@ def campoVacio(campo):
 
 def pedirDatosCliente(nuevo):
 
-    campos = ["Nombre: ", "Apellidos: ", "Correo: ", "Dirección: ", "Telefono: ", "Tipo de Suscripción: "]
+    campos = ["Nombre", "Apellidos", "Correo", "Dirección", "Telefono", "Tipo de Suscripción"]
     val = ["", "", "", "", "", ""]
 
     if nuevo:
@@ -50,31 +50,68 @@ def pedirDatosCliente(nuevo):
     else:
         p = 5
 
-    print("mecagoentumadre")
     for i in range(0, p):
-        print(campos[i])
 
         aux = ""
         while(campoVacio(aux)):
-            aux = str(input())
+
+            aux = str(input(campos[i] + ": "))
 
             if campoVacio(aux):
                 print("No se admiten campos vacios.\nPor favor introduzca el campo %s con el dato correspondiente"%(campos[i]))
         
             else:
-                val[i]= aux
-
-
+                val[i] = aux
     return val
+
+def convierteTelefono(telefonoCliente):
+    try:
+        toDev = int(telefonoCliente)
+    except Exception as ex:
+        if isinstance(ex, ValueError):
+            #print("Ha introducido una letra en el teléfono - Carácter erróneo")
+            toDev = -1
+
+    return toDev
+
+def muestraExcepcion(ex):
+    errorCorreo = 'CONTROL_CORREO'
+    errorTelefonoCaracter = 'CONTROL_TELEFONO'
+    errorSuscripcion = 'CK_CLIENTES'
+    errorTelefonoRepetido = 'UK_CLIENTES_TELEFONO'
+    errorCorreoRepetido = 'UK_CLIENTES_CORREO'
+    errorUpdateSuscripcion = 'CONTROL_SUSCRIPCION'
+    errorFormatoDNI = 'CONTROL_DNI'
+    errorLongitudTel = 'CONTROL_LONGITUD_TELEFONO'
+
+    tipoError = ['CONTROL_CORREO', 'CONTROL_TELEFONO', 'CK_CLIENTES', 'UK_CLIENTES_TELEFONO', 'UK_CLIENTES_CORREO',
+    'CONTROL_SUSCRIPCION', 'CONTROL_DNI', 'CONTROL_LONGITUD_TELEFONO']
+
+    mensajeError = [
+        "El formato del correo no sigue el formato _@_._",
+        "Se ha introducido un carácter alfabético en el teléfono",
+        "Tipo de suscripción no válida",
+        "Telefono repetido",
+        "Correo repetido",
+        "Tipo de suscripción no válida",
+        "Formato de DNI incorrecto",
+        "Formato de teléfono invalido"
+    ]
+
+    print('----------------------------------------------')
+    for i in range(0, 7):
+        if tipoError[i] in str(ex):
+            print(mensajeError[i])
+    print('----------------------------------------------')
+   
 
 def anadirCliente(conn):
 
     dniCliente = ""
     while(dniCliente == ""):
-        print("DNI: ")
-        dniCliente = str(input())
+        dniCliente = str(input("DNI: "))
         if campoVacio(dniCliente):
-            print("No se admiten campos vacios, por favor introduzca los datos correspondientes")
+            print("No se admiten campos vacios, por favor introduzca el valor del DNI correspondiente")
 
     # Vamos a buscar primero al cliente por su DNI en la tabla de CLIENTE
     # Se tiene que cambiar por un trigger
@@ -84,13 +121,13 @@ def anadirCliente(conn):
     else:
 
         (nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente) = pedirDatosCliente(True)
-        
+        tel = convierteTelefono(telefonoCliente)
         insertaCliente = """
             INSERT INTO CLIENTES 
             (DNI, NOMBRE, APELLIDOS, CORREO, DIRECCION, TELEFONO, TIPO_SUSCRIPCION) 
             values ('%s', '%s', '%s', '%s', '%s', %i, '%s')
         """%(dniCliente, nombreCliente, apellidosCliente, correoCliente,
-            direccionCliente, int(telefonoCliente), suscripcionCliente)
+            direccionCliente, tel, suscripcionCliente)
 
         #print(insertaCliente)
         try:
@@ -99,11 +136,12 @@ def anadirCliente(conn):
                 print(insertaCliente)
                 cursor.commit()
         except Exception as ex:
-            print(ex)
+            muestraExcepcion(ex)
+
+            
 
 def borrarCliente(conn):
-    print("DNI: ")
-    dniCliente = str(input())
+    dniCliente = str(input("DNI: "))
 
     # Vamos a buscar primero al cliente por su DNI en la tabla de CLIENTE
     # Se tiene que cambiar por un trigger
@@ -123,18 +161,20 @@ def borrarCliente(conn):
 
 def modificarCliente(conn):
 
-    print("DNI: ")
-    dniCliente = str(input())
+    dniCliente = str(input("DNI: "))
 
     # Trigger
 
     if buscaCliente(conn, dniCliente) == 0:
         nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente = pedirDatosCliente(False)
+        tel = convierteTelefono(telefonoCliente)
+
+        dniNuevo = str(input("DNI nuevo: "))
         sentencia = """
         UPDATE CLIENTES 
         SET TELEFONO = '%s', NOMBRE = '%s', APELLIDOS = '%s', 
-        CORREO = '%s', DIRECCION = '%s' WHERE DNI = '%s';
-        """%(nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, dniCliente)
+        CORREO = '%s', DIRECCION = '%s', DNI = '%s' WHERE DNI = '%s';
+        """%(tel, nombreCliente, apellidosCliente, correoCliente, direccionCliente, dniNuevo, dniCliente)
         
         #print(sentencia)
         try:
@@ -142,20 +182,18 @@ def modificarCliente(conn):
                 cursor.execute(sentencia)
                 cursor.commit()
         except Exception as ex:
-            print(ex)
+            muestraExcepcion(ex)
     else:
         print("El cliente no existe")
 
 
 
 def gestionarSuscripcion(conn):
-    print("DNI: ")
-    dniCliente = str(input())
+    dniCliente = str(input("DNI: "))
 
     # Trigger y check sobre suscripcion
     if buscaCliente(conn, dniCliente) == 0:
-        print("Introduce el nuevo tipo de suscripción: ")
-        tipoSuscripcion = str(input())
+        tipoSuscripcion = str(input("Introduce el nuevo tipo de suscripción: "))
         sentencia = """
         UPDATE CLIENTES SET TIPO_SUSCRIPCION = '%s' WHERE DNI = '%s';
         """%(tipoSuscripcion, dniCliente)
@@ -165,7 +203,7 @@ def gestionarSuscripcion(conn):
                 cursor.execute(sentencia)
                 cursor.commit()
         except Exception as ex:
-            print(ex)
+            muestraExcepcion(ex)
     else:
         print("El cliente no existe")
 
@@ -199,7 +237,7 @@ def muestraClientes(conn):
             dataClientes = cursor.fetchall()
             if len(dataClientes) != 0:
                 for prod in dataClientes:
-                    print("DNI  NOMBRE  APELLIDOS  CORREO  DIRECCION  TELEFONO SUSCRIPCION")
+                    print("DNI  NOMBRE  APELLIDOS  CORREO  DIRECCION  TELÉFONO SUSCRIPCION")
                     print("""%s, %s, %s, %s, %s, %s, %s"""%(prod[0], prod[1], prod[2], prod[3], prod[4], prod[5], prod[6]))
 
             else:
@@ -214,16 +252,17 @@ def gestionClientes(conn):
     val = 1
     while(val >= 1 and val <= 6) and val != 7:
         print('Gestión de Clientes\nPor favor indique la gestion a realizar\n')
-        print('1. Añadir un nuevo cliente\n')
-        print('2. Borrar un cliente\n')
-        print('3. Modificar datos de un cliente\n')
-        print('4. Gestionar la suscripción de un cliente\n')
-        print('5. Apuntar un cliente a una clase\n')
-        print('6. Mostrar datos de los clientes\n')
-        print('7. Volver al menú principal\n')
+        print('1. Añadir un nuevo cliente')
+        print('2. Borrar un cliente')
+        print('3. Modificar datos de un cliente')
+        print('4. Gestionar la suscripción de un cliente')
+        print('5. Apuntar un cliente a una clase')
+        print('6. Mostrar datos de los clientes')
+        print('7. Volver al menú principal')
         print('Introduce opción: ')
         val = int(input())
 
+        os.system('cls' if os.name == 'nt' else 'clear')
         if val == 1:
             anadirCliente(conn)
         elif val == 2:
