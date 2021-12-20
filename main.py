@@ -36,8 +36,6 @@ def main():
     val = 1
 
     while (val >= 0 and val <= 4) and val != 5:
-        savepointFromMain = "SAVEPOINT savepointFromMain"
-        conn.execute(savepointFromMain)
         print('0. Inicializar la base de datos\n')
         print('1. Gestión de Clientes\n')
         print('2. Gestión de Entrenadores\n')
@@ -64,7 +62,6 @@ def main():
             with conn.cursor() as cursor:
                 cursor.rollback()
 
-    conn.commit()
     conn.close()
 
 main()

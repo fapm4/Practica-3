@@ -12,20 +12,25 @@ from time import gmtime, strftime
 
 
 ##########################################################################################################################
-def buscaCliente(conn, cli):
+def buscaDato(conn, dato, tabla):
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT DNI FROM CLIENTES")
+            if tabla == "clientes":
+                sentencia = "SELECT DNI FROM CLIENTES"
+            elif tabla == "clases":
+                sentencia = "SELECT ID_CLASE FROM CLASE"
+
+            cursor.execute(sentencia)
     
             existe = -1
             
             # Los recupero y los guardo
-            dataClientes = cursor.fetchall()
+            data = cursor.fetchall()
 
-            if len(dataClientes) != 0:
-                for prod in dataClientes:
+            if len(data) != 0:
+                for prod in data:
                     #print(prod[0])
-                    if cli is prod[0] or cli == prod[0]:
+                    if dato is prod[0] or dato == prod[0]:
                         existe = 0   
                 
     except Exception as ex:
@@ -75,17 +80,9 @@ def convierteTelefono(telefonoCliente):
     return toDev
 
 def muestraExcepcion(ex):
-    errorCorreo = 'CONTROL_CORREO'
-    errorTelefonoCaracter = 'CONTROL_TELEFONO'
-    errorSuscripcion = 'CK_CLIENTES'
-    errorTelefonoRepetido = 'UK_CLIENTES_TELEFONO'
-    errorCorreoRepetido = 'UK_CLIENTES_CORREO'
-    errorUpdateSuscripcion = 'CONTROL_SUSCRIPCION'
-    errorFormatoDNI = 'CONTROL_DNI'
-    errorLongitudTel = 'CONTROL_LONGITUD_TELEFONO'
 
     tipoError = ['CONTROL_CORREO', 'CONTROL_TELEFONO', 'CK_CLIENTES', 'UK_CLIENTES_TELEFONO', 'UK_CLIENTES_CORREO',
-    'CONTROL_SUSCRIPCION', 'CONTROL_DNI', 'CONTROL_LONGITUD_TELEFONO']
+    'CONTROL_SUSCRIPCION', 'CONTROL_DNI', 'CONTROL_LONGITUD_TELEFONO', 'CONTROL_CLASES_APUNTADAS']
 
     mensajeError = [
         "El formato del correo no sigue el formato _@_._",
@@ -95,15 +92,21 @@ def muestraExcepcion(ex):
         "Correo repetido",
         "Tipo de suscripción no válida",
         "Formato de DNI incorrecto",
-        "Formato de teléfono invalido"
-    ]
+        "Formato de teléfono invalido",
+        "Se ha alcanzado el máximo de clases para una semana"]
 
+    stop = False
     print('----------------------------------------------')
-    for i in range(0, 7):
+    for i in range(0, len(mensajeError)):
         if tipoError[i] in str(ex):
             print(mensajeError[i])
+            stop = False
+        else: 
+            stop = True
     print('----------------------------------------------')
    
+    if stop == True:
+        print(ex)
 
 def anadirCliente(conn):
 
@@ -114,20 +117,18 @@ def anadirCliente(conn):
             print("No se admiten campos vacios, por favor introduzca el valor del DNI correspondiente")
 
     # Vamos a buscar primero al cliente por su DNI en la tabla de CLIENTE
-    # Se tiene que cambiar por un trigger
 
-    if buscaCliente(conn, dniCliente) == 0:
+    if buscaDato(conn, dniCliente, "clientes") == 0:
         print("El cliente ya existe")
     else:
-
         (nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente) = pedirDatosCliente(True)
         tel = convierteTelefono(telefonoCliente)
         insertaCliente = """
             INSERT INTO CLIENTES 
-            (DNI, NOMBRE, APELLIDOS, CORREO, DIRECCION, TELEFONO, TIPO_SUSCRIPCION) 
-            values ('%s', '%s', '%s', '%s', '%s', %i, '%s')
+            (DNI, NOMBRE, APELLIDOS, CORREO, DIRECCION, TELEFONO, TIPO_SUSCRIPCION, CLASES_APUNTADAS) 
+            values ('%s', '%s', '%s', '%s', '%s', %i, '%s', %i)
         """%(dniCliente, nombreCliente, apellidosCliente, correoCliente,
-            direccionCliente, tel, suscripcionCliente)
+            direccionCliente, tel, suscripcionCliente, 0)
 
         #print(insertaCliente)
         try:
@@ -135,18 +136,16 @@ def anadirCliente(conn):
                 cursor.execute(insertaCliente)
                 print(insertaCliente)
                 cursor.commit()
+
         except Exception as ex:
             muestraExcepcion(ex)
-
-            
 
 def borrarCliente(conn):
     dniCliente = str(input("DNI: "))
 
     # Vamos a buscar primero al cliente por su DNI en la tabla de CLIENTE
-    # Se tiene que cambiar por un trigger
 
-    if buscaCliente(conn, dniCliente) == 0:
+    if buscaDato(conn, dniCliente, "clientes") == 0:
         sentencia = """
         DELETE FROM CLIENTES WHERE DNI = '%s'
         """%(dniCliente);
@@ -165,7 +164,7 @@ def modificarCliente(conn):
 
     # Trigger
 
-    if buscaCliente(conn, dniCliente) == 0:
+    if buscaDato(conn, dniCliente, "clientes") == 0:
         nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente = pedirDatosCliente(False)
         tel = convierteTelefono(telefonoCliente)
 
@@ -192,7 +191,7 @@ def gestionarSuscripcion(conn):
     dniCliente = str(input("DNI: "))
 
     # Trigger y check sobre suscripcion
-    if buscaCliente(conn, dniCliente) == 0:
+    if buscaDato(conn, dniCliente, "clientes") == 0:
         tipoSuscripcion = str(input("Introduce el nuevo tipo de suscripción: "))
         sentencia = """
         UPDATE CLIENTES SET TIPO_SUSCRIPCION = '%s' WHERE DNI = '%s';
@@ -208,25 +207,55 @@ def gestionarSuscripcion(conn):
         print("El cliente no existe")
 
 
+def obtenNumClases(conn, dniCliente):
+    sentencia = """
+    SELECT CLASES_APUNTADAS FROM CLIENTES WHERE DNI ='%s'
+    """%(dniCliente)
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sentencia)
+            clases = cursor.fetchone()[0]
+            cursor.commit()
+
+    except Exception as ex:
+        print(ex)
+
+    return clases
+
+# Falta esto
+# saco la instalacion a traves del id de la clase
+# controlar el numero de clases
 def apuntarAClase(conn):
-    print("DNI: ")
-    dniCliente = str(input())
+    dniCliente = str(input("DNI: "))
 
     # Comprobar aforo clase con trigger
     # y número de clases
-    if buscaCliente(conn, dniCliente) == 0:
-        print("ID de la clase: ")
-        idClase = str(input())
-        # Buscar clase con trigger
+    if buscaDato(conn, dniCliente, "clientes") == 0:
+        idClase = str(input("ID de la clase: "))
+        
+        # Busco la clase
+        if buscaDato(conn, idClase, "clases") == 0:
+            #print("Clase encontrada")
+            # Primero miro el tipo de suscripcion y el número de clases semanal
 
-        sentencia = "INSERT INTO APUNTADO VALUES (\'" + dniCliente + "\', \'" + idClase + "\');"
-        print(sentencia)
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute(sentencia)
-                cursor.commit()
-        except Exception as ex:
-            print(ex)
+            
+            clases = obtenNumClases(conn, dniCliente)
+            # Actualizo el número de clases
+            sentencia = """
+            UPDATE CLIENTES SET 
+            CLASES_APUNTADAS = %i WHERE DNI = '%s'
+            """%(clases + 1, dniCliente)
+
+            try:
+                with conn.cursor() as cursor:
+                    cursor.execute(sentencia)
+                    cursor.commit()
+
+            except Exception as ex:
+                muestraExcepcion(ex)
+        else:
+            print("La clase no existe")
+        
     else:
         print("El cliente no existe")
 
@@ -236,12 +265,23 @@ def muestraClientes(conn):
             cursor.execute("SELECT * FROM CLIENTES")
             dataClientes = cursor.fetchall()
             if len(dataClientes) != 0:
+                print("----------------------------------------")
                 for prod in dataClientes:
-                    print("DNI  NOMBRE  APELLIDOS  CORREO  DIRECCION  TELÉFONO SUSCRIPCION")
-                    print("""%s, %s, %s, %s, %s, %s, %s"""%(prod[0], prod[1], prod[2], prod[3], prod[4], prod[5], prod[6]))
+                    print("#############################################")
+                    print("DNI: %s"%(prod[0]))
+                    print("Nombre: %s"%(prod[1]))
+                    print("Apellidos: %s"%(prod[2]))
+                    print("Correo: %s"%(prod[3]))
+                    print("Dirección: %s"%(prod[4]))
+                    print("Teléfono: %s"%(prod[5]))
+                    print("Suscripción: %s"%(prod[6]))
+                    print("#############################################")
+                    #print("DNI  NOMBRE  APELLIDOS  CORREO  DIRECCION  TELÉFONO SUSCRIPCION")
+                    #print("""%s, %s, %s, %s, %s, %s, %s"""%(prod[0], prod[1], prod[2], prod[3], prod[4], prod[5], prod[6]))
 
             else:
                 print("No hay información de clientes aún")
+                print("----------------------------------------")
             
 
     except Exception as ex:

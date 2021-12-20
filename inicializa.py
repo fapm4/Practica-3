@@ -48,6 +48,8 @@ def createTables(conn):
             DIRECCION VARCHAR2(40),
             TELEFONO NUMBER(9),
             TIPO_SUSCRIPCION VARCHAR2(9),
+            CLASES_APUNTADAS NUMBER(1),
+            CONSTRAINT CK_MAX_CLASES CHECK (CLASES_APUNTADAS >=0 AND CLASES_APUNTADAS <= 7),
             CONSTRAINT PK_CLIENTES PRIMARY KEY (DNI),
             CONSTRAINT UK_CLIENTES_CORREO UNIQUE (CORREO),
             CONSTRAINT UK_CLIENTES_TELEFONO UNIQUE (TELEFONO),
@@ -121,8 +123,7 @@ def createTables(conn):
         WHEN (NEW.TELEFONO = -1)
         BEGIN
             raise_application_error(-20601,'Ha introducido un carácter alfabético en el campo teléfono');
-        END;
-        '''
+        END;'''
 
         with conn.cursor() as cursor: 
             cursor.execute(triggerCaracterTelefono)
@@ -134,8 +135,7 @@ def createTables(conn):
         WHEN (NEW.CORREO NOT LIKE '_%@__%.__%')
         BEGIN
             raise_application_error(-20600,'Ha introducido un carácter alfabético en el campo teléfono');
-        END;
-        '''
+        END;'''
 
         with conn.cursor() as cursor: 
             cursor.execute(triggerControlCorreo)
@@ -149,8 +149,7 @@ def createTables(conn):
         WHEN (NEW.TIPO_SUSCRIPCION NOT IN ('NORMAL', 'MEDIO', 'PREMIUM'))
         BEGIN
             raise_application_error(-20602,'Se ha introducido un tipo de suscripción no válido');
-        END;
-        '''
+        END;'''
 
         with conn.cursor() as cursor: 
             cursor.execute(triggerControlSuscripcion)
@@ -171,8 +170,7 @@ def createTables(conn):
                         raise_application_error(-20603,'Formato de DNI incorrecto');
                     END IF;
                 END IF; 
-        END;
-        '''
+            END;'''
 
         with conn.cursor() as cursor: 
             cursor.execute(triggerControlFormatoDNI)
@@ -185,12 +183,40 @@ def createTables(conn):
         WHEN (NEW.TELEFONO NOT LIKE '_________')
         BEGIN
             raise_application_error(-20604,'Longitud de teléfono no válida');
-        END;
-        '''
+        END;'''
 
         with conn.cursor() as cursor: 
             cursor.execute(triggerControlLongitudTelefono)
             cursor.commit()
+
+        triggerControlClasesApuntadas = '''
+        create or replace TRIGGER CONTROL_CLASES_APUNTADAS
+        AFTER UPDATE OF CLASES_APUNTADAS
+        ON CLIENTES FOR EACH ROW
+        DECLARE
+            TIPO CLIENTES.TIPO_SUSCRIPCION%TYPE;
+            NUM_CLASES CLIENTES.CLASES_APUNTADAS%TYPE;
+            CURSOR C1 IS SELECT TIPO_SUSCRIPCION, CLASES_APUNTADAS INTO TIPO, NUM_CLASES FROM CLIENTES WHERE DNI = :NEW.DNI;
+        BEGIN
+            IF(TIPO = 'NORMAL') THEN
+                IF(NUM_CLASES >= 2) THEN
+                    raise_application_error(-20605, 'Número de máximo de clases alcanzada');
+                END IF;
+            ELSIF (TIPO = 'MEDIO') THEN
+                IF (NUM_CLASES >= 4) THEN 
+                    raise_application_error(-20606, 'Número de máximo de clases alcanzada');
+                END IF;
+            ELSIF (TIPO = 'PREMIUM') THEN
+                IF (NUM_CLASES >= 8) THEN
+                    raise_application_error(-20607, 'Número de máximo de clases alcanzada');
+                END IF;
+            END IF;
+        END;'''
+
+        with conn.cursor() as cursor: 
+            cursor.execute(triggerControlClasesApuntadas)
+            cursor.commit()
+
     except Exception as ex:
         print(ex)
 
