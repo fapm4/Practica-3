@@ -223,14 +223,9 @@ def obtenNumClases(conn, dniCliente):
 
     return clases
 
-# Falta esto
-# saco la instalacion a traves del id de la clase
-# controlar el numero de clases
 def apuntarAClase(conn):
     dniCliente = str(input("DNI: "))
 
-    # Comprobar aforo clase con trigger
-    # y número de clases
     if buscaDato(conn, dniCliente, "clientes") == 0:
         idClase = str(input("ID de la clase: "))
         
@@ -240,9 +235,8 @@ def apuntarAClase(conn):
 
             # Primero miro el aforo de la clase
             sentencia = """
-            SELECT AFORO FROM INSTALACION, CLASE WHERE ID_CLASE = ID_INSTALACION
-            """
-
+            SELECT AFORO FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i AND L.ID_INSTALACION = (SELECT I.ID_INSTALACION FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i);
+            """%(int(idClase), int(idClase))
             try:
                 with conn.cursor() as cursor:
                     cursor.execute(sentencia)
@@ -317,10 +311,44 @@ def muestraClientes(conn):
     except Exception as ex:
         print(ex)
 
+def mostrarClasesDeCliente(conn):
+    dniCliente = str(input("DNI: "))
+
+    if buscaDato(conn, dniCliente, "clientes") == 0:
+        sentencia = """
+        SELECT C.ID_CLASE, TEMATICA, HORARIO, I.ID_INSTALACION, AFORO 
+        FROM CLASE C, INSTALACION I, APUNTADO A, LUGAR L 
+        WHERE DNI = '%s' AND A.DNI = '%s'
+        AND A.ID_CLASE = C.ID_CLASE
+        AND L.ID_CLASE = C.ID_CLASE;
+        """%(dniCliente, dniCliente)
+
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(sentencia)
+                dataClientes = cursor.fetchall()
+                if len(dataClientes) != 0:
+                    print("----------------------------------------")
+                    for prod in dataClientes:
+                        print("#############################################")
+                        print("ID de la clase: %s"%(prod[0]))
+                        print("Temática: %s"%(prod[1]))
+                        print("Horario: %s"%(prod[2]))
+                        print("ID de la instalación: %s"%(prod[3]))
+                        print("Aforo máximo: %s"%(prod[4]))
+                        print("#############################################")
+                else:
+                    print("No hay información de clientes aún")
+                    print("----------------------------------------")
+        
+        except Exception as ex:
+            print(ex)
+    else:
+        print("El cliente no existe")
 
 def gestionClientes(conn):
     val = 1
-    while(val >= 1 and val <= 6) and val != 7:
+    while(val >= 1 and val <= 7) and val != 8:
         print('Gestión de Clientes\nPor favor indique la gestion a realizar\n')
         print('1. Añadir un nuevo cliente')
         print('2. Borrar un cliente')
@@ -328,7 +356,8 @@ def gestionClientes(conn):
         print('4. Gestionar la suscripción de un cliente')
         print('5. Apuntar un cliente a una clase')
         print('6. Mostrar datos de los clientes')
-        print('7. Volver al menú principal')
+        print('7. Mostrar clases de un cliente')
+        print('8. Volver al menú principal')
         print('Introduce opción: ')
         val = int(input())
 
@@ -345,4 +374,6 @@ def gestionClientes(conn):
             apuntarAClase(conn)
         elif val == 6:
             muestraClientes(conn)
+        elif val == 7:
+            mostrarClasesDeCliente(conn)
 ##########################################################################################################################

@@ -37,12 +37,12 @@ def main():
     val = 1
 
     while (val >= 0 and val <= 4) and val != 5:
-        print('0. Inicializar la base de datos\n')
-        print('1. Gestión de Clientes\n')
-        print('2. Gestión de Entrenadores\n')
-        print('3. Gestión de Clases\n')
-        print('4. Gestión de Instalaciones\n')
-        print('5. Salir\n')
+        print('0. Inicializar la base de datos')
+        print('1. Gestión de Clientes')
+        print('2. Gestión de Entrenadores')
+        print('3. Gestión de Clases')
+        print('4. Gestión de Instalaciones')
+        print('5. Salir')
         print('Introduce opción: ')
         val = int(input())
 
