@@ -49,7 +49,7 @@ def createTables(conn):
             TELEFONO NUMBER(9),
             TIPO_SUSCRIPCION VARCHAR2(9),
             CLASES_APUNTADAS NUMBER(1),
-            CONSTRAINT CK_MAX_CLASES CHECK (CLASES_APUNTADAS >=0 AND CLASES_APUNTADAS <= 7),
+            CONSTRAINT CK_MAX_CLASES CHECK (CLASES_APUNTADAS >=0 AND CLASES_APUNTADAS <= 25),
             CONSTRAINT PK_CLIENTES PRIMARY KEY (DNI),
             CONSTRAINT UK_CLIENTES_CORREO UNIQUE (CORREO),
             CONSTRAINT UK_CLIENTES_TELEFONO UNIQUE (TELEFONO),
@@ -190,24 +190,20 @@ def createTables(conn):
             cursor.commit()
 
         triggerControlClasesApuntadas = '''
-        create or replace TRIGGER CONTROL_CLASES_APUNTADAS
+        CREATE OR REPLACE TRIGGER CONTROL_CLASES_APUNTADAS
         AFTER UPDATE OF CLASES_APUNTADAS
         ON CLIENTES FOR EACH ROW
-        DECLARE
-            TIPO CLIENTES.TIPO_SUSCRIPCION%TYPE;
-            NUM_CLASES CLIENTES.CLASES_APUNTADAS%TYPE;
-            CURSOR C1 IS SELECT TIPO_SUSCRIPCION, CLASES_APUNTADAS INTO TIPO, NUM_CLASES FROM CLIENTES WHERE DNI = :NEW.DNI;
         BEGIN
-            IF(TIPO = 'NORMAL') THEN
-                IF(NUM_CLASES >= 2) THEN
+            IF(:NEW.TIPO_SUSCRIPCION = 'NORMAL') THEN
+                IF(:NEW.CLASES_APUNTADAS >= 6) THEN
                     raise_application_error(-20605, 'Número de máximo de clases alcanzada');
                 END IF;
-            ELSIF (TIPO = 'MEDIO') THEN
-                IF (NUM_CLASES >= 4) THEN 
+            ELSIF (:NEW.TIPO_SUSCRIPCION = 'MEDIO') THEN
+                IF (:NEW.CLASES_APUNTADAS >= 16) THEN 
                     raise_application_error(-20606, 'Número de máximo de clases alcanzada');
                 END IF;
-            ELSIF (TIPO = 'PREMIUM') THEN
-                IF (NUM_CLASES >= 8) THEN
+            ELSIF (:NEW.TIPO_SUSCRIPCION = 'PREMIUM') THEN
+                IF (:NEW.CLASES_APUNTADAS >= 26) THEN
                     raise_application_error(-20607, 'Número de máximo de clases alcanzada');
                 END IF;
             END IF;

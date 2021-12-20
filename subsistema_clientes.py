@@ -82,7 +82,7 @@ def convierteTelefono(telefonoCliente):
 def muestraExcepcion(ex):
 
     tipoError = ['CONTROL_CORREO', 'CONTROL_TELEFONO', 'CK_CLIENTES', 'UK_CLIENTES_TELEFONO', 'UK_CLIENTES_CORREO',
-    'CONTROL_SUSCRIPCION', 'CONTROL_DNI', 'CONTROL_LONGITUD_TELEFONO', 'CONTROL_CLASES_APUNTADAS']
+    'CONTROL_SUSCRIPCION', 'CONTROL_DNI', 'CONTROL_LONGITUD_TELEFONO', 'CONTROL_CLASES_APUNTADAS', 'PK_APUNTADO']
 
     mensajeError = [
         "El formato del correo no sigue el formato _@_._",
@@ -93,7 +93,8 @@ def muestraExcepcion(ex):
         "Tipo de suscripción no válida",
         "Formato de DNI incorrecto",
         "Formato de teléfono invalido",
-        "Se ha alcanzado el máximo de clases para una semana"]
+        "Se ha alcanzado el máximo de clases por mes",
+        "Cliente ya apuntado a esa clase"]
 
     stop = False
     print('----------------------------------------------')
@@ -236,23 +237,55 @@ def apuntarAClase(conn):
         # Busco la clase
         if buscaDato(conn, idClase, "clases") == 0:
             #print("Clase encontrada")
-            # Primero miro el tipo de suscripcion y el número de clases semanal
 
-            
-            clases = obtenNumClases(conn, dniCliente)
-            # Actualizo el número de clases
+            # Primero miro el aforo de la clase
             sentencia = """
-            UPDATE CLIENTES SET 
-            CLASES_APUNTADAS = %i WHERE DNI = '%s'
-            """%(clases + 1, dniCliente)
+            SELECT AFORO FROM INSTALACION, CLASE WHERE ID_CLASE = ID_INSTALACION
+            """
 
             try:
                 with conn.cursor() as cursor:
                     cursor.execute(sentencia)
-                    cursor.commit()
-
+                    aforoMaximo = cursor.fetchone()[0]
             except Exception as ex:
-                muestraExcepcion(ex)
+                print(ex)
+    
+            # Después busco en apuntados
+            sentencia = """
+            select count(DNI) from APUNTADO where ID_CLASE = %i;
+            """%(int(idClase))
+
+            try:
+                with conn.cursor() as cursor:
+                    cursor.execute(sentencia)
+                    aforoActual = cursor.fetchone()[0]
+            except Exception as ex:
+                print(ex)
+
+            # Si queda espacio, meto al cliente
+            if(aforoActual <= aforoMaximo):
+                # Después miro el tipo de suscripcion y el número de clases mensual
+                clases = obtenNumClases(conn, dniCliente)
+                # Actualizo el número de clases
+                sentencia = """
+                UPDATE CLIENTES SET 
+                CLASES_APUNTADAS = %i WHERE DNI = '%s'
+                """%(clases + 1, dniCliente)
+
+                try:
+                    with conn.cursor() as cursor:
+                        cursor.execute(sentencia)
+                        # Me queda insertar en apuntado
+
+                        sentencia = """
+                        INSERT INTO APUNTADO VALUES('%s', %i)
+                        """%(dniCliente, int(idClase))
+
+                        cursor.execute(sentencia)
+                        cursor.commit()
+
+                except Exception as ex:
+                    muestraExcepcion(ex)
         else:
             print("La clase no existe")
         
@@ -276,9 +309,6 @@ def muestraClientes(conn):
                     print("Teléfono: %s"%(prod[5]))
                     print("Suscripción: %s"%(prod[6]))
                     print("#############################################")
-                    #print("DNI  NOMBRE  APELLIDOS  CORREO  DIRECCION  TELÉFONO SUSCRIPCION")
-                    #print("""%s, %s, %s, %s, %s, %s, %s"""%(prod[0], prod[1], prod[2], prod[3], prod[4], prod[5], prod[6]))
-
             else:
                 print("No hay información de clientes aún")
                 print("----------------------------------------")

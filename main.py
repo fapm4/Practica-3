@@ -10,6 +10,7 @@ import inicializa
 import subsistema_entrenadores
 import subsistema_clientes
 import subsistema_clases
+import subsistema_instalacion
 import os
 
 from time import gmtime, strftime
@@ -57,7 +58,7 @@ def main():
             elif val == 3:
                 subsistema_clases.gestionClases(conn)
             elif val == 4:
-                print('Esta parte es de Fjorn\n')
+                subsistema_instalacion.gestionInstalacion(conn)
         else:
             with conn.cursor() as cursor:
                 cursor.rollback()
