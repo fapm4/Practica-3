@@ -1,5 +1,6 @@
 import tkinter
 from tkinter import *
+from typing import NewType
 import inicializa as ini
 import subsistema_clientes as clientes
 import pyodbc
@@ -57,6 +58,10 @@ def ventanaGestionClientes():
     botonSalir = Button(newWindow, text = "8. Volver al menú principal", width = "30", 
     cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 400)
 
+
+camposCliente = ["DNI", "Nombre", "Apellidos", "Correo", "Dirección", "Telefono", "Tipo de Suscripción"]
+datosCliente = ["", "", "", "", "", "", ""]
+
 def anadirClienteInterfaz():
     newWindow = Toplevel()
     newWindow.config(width = "1080", height = "720", bd = "10", relief = "sunken")
@@ -64,19 +69,33 @@ def anadirClienteInterfaz():
     font = ("Time News Roman", 10), text = "Introduzca los datos del cliente.")
     etiquetaInformacion.place(x = 300, y = 0)
 
-    campos = ["DNI", "Nombre", "Apellidos", "Correo", "Dirección", "Telefono", "Tipo de Suscripción"]
-    variables = ["dniCliente", "nombreCliente", "apellidosCliente", "correoCliente", "tel", "suscripcionCliente"]
-    val = ["", "", "", "", "", "", ""]
+    variables = [StringVar(), StringVar(), StringVar(), StringVar(), StringVar(), StringVar(), StringVar()]
 
-    for i in range(0, 6):
-        val[i] = StringVar()
-        label = Label(newWindow, text = campos[i]).grid(row = i, column = 0, padx = 10, pady = 10)
-        val[i] = Entry(newWindow, textvariable = variables[i]).grid(row = i, column = 1, padx = 10, pady = 10)
+    for i in range(0, len(camposCliente)):
+        label = Label(newWindow, text = camposCliente[i], font = ("Time News Roman", 10)).grid(row = i, column = 0, padx = 10, pady = 10)
+        entry = Entry(newWindow, textvariable = variables[i])
+        entry.grid(row = i, column = 1)
+        
+    boton = Button(newWindow, text = "Crear Usuario", command = lambda: getDato(variables))
+    boton.grid(row = 7, column = 0, padx = 10, pady = 10)
 
-    for i in range(0, 6):
-        print(val[i])
     
 
+        
+    #dni = StringVar(newWindow)
+    #entry = Text(newWindow)
+    #
+    # entry.place(x = 50, y = 50, width = "200", height = "20")
+    #btn = Button(newWindow, command = lambda: prueba(entry)).place(x = 50, y = 150)
+    
+def getDato(dato):
+    for i in range(0, len(camposCliente)):
+        result = dato[i].get()
+        datosCliente[i] = result
+    
+    clientes.anadirCliente(conn, datosCliente)
+        #print(datosCliente[i])
+        
 ###################################################################################################################################
 miFrame = Frame()
 miFrame.pack(expand = "True", fill = "both")

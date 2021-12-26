@@ -136,10 +136,11 @@ def anadirCliente(conn, datos):
         print("El cliente ya existe")
     else:
         if(len(datos) != 0):
-            (dniCliente, nombreCliente, apellidosCliente, correoCliente, direccionCliente, tel, suscripcionCliente) = datos
+            (dniCliente, nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente) = datos
         else:
             (nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente) = pedirDatosCliente(True)
-            tel = convierteTelefono(telefonoCliente)
+            
+        tel = convierteTelefono(telefonoCliente)
         
         insertaCliente = """
             INSERT INTO CLIENTES 
