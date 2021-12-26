@@ -11,6 +11,7 @@ import tkinter
 from tkinter import *
 import inicializa
 from time import gmtime, strftime
+import subsistema_clases
 
 
 ##########################################################################################################################
@@ -273,6 +274,7 @@ def apuntarAClase(conn, dni, idclase):
         if(idclase != ""):
             idClase = idclase
         else:
+            subsistema_clases.mostrar_clases(conn)
             idClase = str(input("ID de la clase: "))
         
         # Busco la clase
