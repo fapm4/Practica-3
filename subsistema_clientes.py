@@ -145,7 +145,7 @@ def anadirCliente(conn, datos):
         insertaCliente = """
             INSERT INTO CLIENTES 
             (DNI, NOMBRE, APELLIDOS, CORREO, DIRECCION, TELEFONO, TIPO_SUSCRIPCION, CLASES_APUNTADAS) 
-            values ('%s', '%s', '%s', '%s', '%s', %i, '%s', %i)
+            VALUES ('%s', '%s', '%s', '%s', '%s', %i, '%s', %i)
         """%(dniCliente, nombreCliente, apellidosCliente, correoCliente,
             direccionCliente, tel, suscripcionCliente, 0)
 
@@ -281,9 +281,12 @@ def apuntarAClase(conn, dni, idclase):
 
             # Primero miro el aforo de la clase
             sentencia = """
-            SELECT AFORO FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i 
-            AND L.ID_INSTALACION = (SELECT I.ID_INSTALACION FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i);
+            SELECT AFORO FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i AND L.ID_INSTALACION = I.ID_INSTALACION
+            AND L.ID_INSTALACION = (SELECT DISTINCT(I.ID_INSTALACION) 
+            FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i AND L.ID_INSTALACION = I.ID_INSTALACION)
             """%(int(idClase), int(idClase))
+
+            #print(sentencia)
             try:
                 with conn.cursor() as cursor:
                     cursor.execute(sentencia)
@@ -304,7 +307,7 @@ def apuntarAClase(conn, dni, idclase):
                 print(ex)
 
             # Si queda espacio, meto al cliente
-            if(aforoActual <= aforoMaximo):
+            if(aforoActual + 1 <= aforoMaximo):
                 # Después miro el tipo de suscripcion y el número de clases mensual
                 clases = obtenNumClases(conn, dniCliente)
                 # Actualizo el número de clases
@@ -327,8 +330,11 @@ def apuntarAClase(conn, dni, idclase):
 
                 except Exception as ex:
                     muestraExcepcion(ex)
+
+            else:
+                print("Aforo máximo completado")
         else:
-            print("La clase no existe")
+            print("No existe la clase")
         
     else:
         print("El cliente no existe")
