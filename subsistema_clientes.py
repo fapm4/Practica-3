@@ -159,8 +159,14 @@ def anadirCliente(conn, datos):
         except Exception as ex:
             muestraExcepcion(ex)
 
-def borrarCliente(conn):
-    dniCliente = str(input("DNI: "))
+def borrarCliente(conn, dato):
+
+    if(dato != ""):
+        dniCliente = dato
+
+    else:
+        dniCliente = str(input("DNI: "))
+
 
     # Vamos a buscar primero al cliente por su DNI en la tabla de CLIENTE
 
@@ -382,7 +388,7 @@ def gestionClientes(conn):
         if val == 1:
             anadirCliente(conn, [])
         elif val == 2:
-            borrarCliente(conn)
+            borrarCliente(conn, "")
         elif val == 3:
             modificarCliente(conn)
         elif val == 4:

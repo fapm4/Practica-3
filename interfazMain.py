@@ -38,7 +38,7 @@ def ventanaGestionClientes():
     cursor = "pirate", font = ("Time News Roman", 10), command = anadirClienteInterfaz).place(x = 450, y = 50)
 
     botonBorrarCliente = Button(newWindow, text = "2. Borrar un cliente", width = "30", 
-    cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 100)
+    cursor = "pirate", font = ("Time News Roman", 10), command = borrarClienteInterfaz).place(x = 450, y = 100)
 
     botonModificarCliente = Button(newWindow, text = "3. Modificar datos de un cliente", width = "30", 
     cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 150)
@@ -76,26 +76,41 @@ def anadirClienteInterfaz():
         entry = Entry(newWindow, textvariable = variables[i])
         entry.grid(row = i, column = 1)
         
-    boton = Button(newWindow, text = "Crear Usuario", command = lambda: getDato(variables))
-    boton.grid(row = 7, column = 0, padx = 10, pady = 10)
+    botonCrear = Button(newWindow, text = "Crear Usuario", command = lambda: ejecutaAnadir(variables))
+    botonCrear.grid(row = 7, column = 0, padx = 10, pady = 10)
 
+    botonSalir = Button(newWindow, text = "Volver", command = newWindow.destroy)
+    botonSalir.grid(row = 7, column = 1, padx = 10, pady = 10)
     
-
-        
-    #dni = StringVar(newWindow)
-    #entry = Text(newWindow)
-    #
-    # entry.place(x = 50, y = 50, width = "200", height = "20")
-    #btn = Button(newWindow, command = lambda: prueba(entry)).place(x = 50, y = 150)
-    
-def getDato(dato):
+def ejecutaAnadir(dato):
     for i in range(0, len(camposCliente)):
         result = dato[i].get()
         datosCliente[i] = result
     
     clientes.anadirCliente(conn, datosCliente)
-        #print(datosCliente[i])
+
+def borrarClienteInterfaz():
+    newWindow = Toplevel()
+    newWindow.config(width = "1080", height = "720", bd = "10", relief = "sunken")
+    etiquetaInformacion = Label(newWindow, 
+    font = ("Time News Roman", 10), text = "Introduzca los datos del cliente.")
+    etiquetaInformacion.place(x = 300, y = 0)
+
+    dniCliente = StringVar()
+    label = Label(newWindow, text = camposCliente[0], font = ("Time News Roman", 10)).grid(row = 0, column = 0, padx = 10, pady = 10)
+    entry = Entry(newWindow, textvariable = dniCliente)
+    entry.grid(row = 0, column = 1)
         
+    botonCrear = Button(newWindow, text = "Borrar Usuario", command = lambda: ejecutaBorrar(dniCliente))
+    botonCrear.grid(row = 7, column = 0, padx = 10, pady = 10)
+
+    botonSalir = Button(newWindow, text = "Volver", command = newWindow.destroy)
+    botonSalir.grid(row = 7, column = 1, padx = 10, pady = 10)
+        
+def ejecutaBorrar(dato):
+    result = dato.get()
+    clientes.borrarCliente(conn, result)
+
 ###################################################################################################################################
 miFrame = Frame()
 miFrame.pack(expand = "True", fill = "both")
