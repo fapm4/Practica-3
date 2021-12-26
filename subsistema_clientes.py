@@ -220,11 +220,18 @@ def modificarCliente(conn, datos):
 
 
 
-def gestionarSuscripcion(conn):
-    dniCliente = str(input("DNI: "))
+def gestionarSuscripcion(conn, dni, sus):
 
+    if(dni != "" and sus != ""):
+        dniCliente = dni
+    else:
+        dniCliente = str(input("DNI: "))
+    
     if buscaDato(conn, dniCliente, "clientes") == 0:
-        tipoSuscripcion = str(input("Introduce el nuevo tipo de suscripción: "))
+        if(dni != "" and sus != ""):
+            tipoSuscripcion = sus
+        else:
+            tipoSuscripcion = str(input("Introduce el nuevo tipo de suscripción: "))
         sentencia = """
         UPDATE CLIENTES SET TIPO_SUSCRIPCION = '%s' WHERE DNI = '%s';
         """%(tipoSuscripcion, dniCliente)
@@ -254,11 +261,18 @@ def obtenNumClases(conn, dniCliente):
 
     return clases
 
-def apuntarAClase(conn):
-    dniCliente = str(input("DNI: "))
+def apuntarAClase(conn, dni, idclase):
+    if(dni != ""):
+        dniCliente = dni
+    else:
+        dniCliente = str(input("DNI: "))
 
     if buscaDato(conn, dniCliente, "clientes") == 0:
-        idClase = str(input("ID de la clase: "))
+
+        if(idclase != ""):
+            idClase = idclase
+        else:
+            idClase = str(input("ID de la clase: "))
         
         # Busco la clase
         if buscaDato(conn, idClase, "clases") == 0:
@@ -400,11 +414,11 @@ def gestionClientes(conn):
         elif val == 2:
             borrarCliente(conn, "")
         elif val == 3:
-            modificarCliente(conn)
+            modificarCliente(conn, [])
         elif val == 4:
-            gestionarSuscripcion(conn)
+            gestionarSuscripcion(conn, "", "")
         elif val == 5:
-            apuntarAClase(conn)
+            apuntarAClase(conn, "", "")
         elif val == 6:
             muestraClientes(conn)
         elif val == 7:

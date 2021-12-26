@@ -1,30 +1,12 @@
 import tkinter
 from tkinter import *
 from typing import NewType
+import main as main
 import inicializa as ini
 import subsistema_clientes as clientes
 import pyodbc
 
 
-raiz = Tk()
-
-raiz.title("Practica 3 - DDSI")
- 
-def conectaBase():
-    try:
-        conn = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=oracle0.ugr.es;Service Name=practbd.oracle0.ugr.es;User ID=x8768206;Password=x8768206')
-
-        conn.autocommit = False
-        cursor = conn.cursor()
-        
-    except Exception as ex:
-        print(ex)
-        
-    return conn
-
-conn = conectaBase()
-
-###################################################################################################################################
 def ventanaGestionClientes():
     newWindow = Toplevel()
     newWindow.config(width = "1080", height = "720", bd = "10", relief = "sunken")
@@ -42,21 +24,17 @@ def ventanaGestionClientes():
     botonModificarCliente = Button(newWindow, text = "3. Modificar datos de un cliente", width = "30", 
     cursor = "pirate", font = ("Time News Roman", 10), command = modificarClienteInterfaz).place(x = 450, y = 150)
 
-    botonGestionarSuscripcion = Button(newWindow, text = "4. Gestionar la suscripción de un cliente'", width = "30", 
-    cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 200)
+    botonGestionarSuscripcion = Button(newWindow, text = "4. Gestionar la suscripción de un cliente", width = "30", 
+    cursor = "pirate", font = ("Time News Roman", 10), command = modificarSuscripcionInterfaz).place(x = 450, y = 200)
 
     botonApuntarCliente = Button(newWindow, text = "5. Apuntar un cliente a una clase", width = "30", 
-    cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 250)
+    cursor = "pirate", font = ("Time News Roman", 10), command = apuntarClienteInterfaz).place(x = 450, y = 250)
 
-    botonMostrarClientes = Button(newWindow, text = "6. Mostrar datos de los clientes", width = "30", 
-    cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 300)
+    botonSalir = Button(newWindow, text = "6. Volver al menú principal", width = "30", 
+    cursor = "pirate", font = ("Time News Roman", 10), command = newWindow.destroy).place(x = 450, y = 300)
 
-    botonMostrarClasesDeCliente = Button(newWindow, text = "7. Mostrar clases de un cliente", width = "30", 
-    cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 350)
 
-    botonSalir = Button(newWindow, text = "8. Volver al menú principal", width = "30", 
-    cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 400)
-
+conn = main.conectaBase()
 
 camposCliente = ["DNI", "Nombre", "Apellidos", "Correo", "Dirección", "Telefono", "Tipo de Suscripción"]
 datosCliente = ["", "", "", "", "", "", ""]
@@ -141,31 +119,61 @@ def ejecutaModificar(dato):
     
     clientes.modificarCliente(conn, datosCliente)
 
-###################################################################################################################################
-miFrame = Frame()
-miFrame.pack(expand = "True", fill = "both")
-miFrame.config(width = "1080", height = "720", bd = "10", relief = "sunken")
+def modificarSuscripcionInterfaz():
+    newWindow = Toplevel()
+    newWindow.config(width = "1080", height = "720", bd = "10", relief = "sunken")
+    etiquetaInformacion = Label(newWindow, 
+    font = ("Time News Roman", 10), text = "Introduzca los datos del cliente.")
+    etiquetaInformacion.place(x = 300, y = 0)
 
-etiquetaInformacion = Label(miFrame, 
-font = ("Time News Roman", 10), text = "Bienvenido al centro deportivo Epicardo, por favor, eliga una de las siguientes opciones:")
-etiquetaInformacion.place(x = 300, y = 0)
+    dniCliente = StringVar()
+    label = Label(newWindow, text = camposCliente[0], font = ("Time News Roman", 10)).grid(row = 0, column = 0, padx = 10, pady = 10)
+    entry = Entry(newWindow, textvariable = dniCliente)
+    entry.grid(row = 0, column = 1)
 
-botonInicializar = Button(miFrame, text = "1. Inicializar BBDD", width = "30", 
-cursor = "pirate", font = ("Time News Roman", 10), command = ini.main(conn)).place(x = 450, y = 50)
+    suscripcionCliente = StringVar()
+    label = Label(newWindow, text = camposCliente[6], font = ("Time News Roman", 10)).grid(row = 1, column = 0, padx = 10, pady = 10)
+    entry = Entry(newWindow, textvariable = suscripcionCliente)
+    entry.grid(row = 1, column = 1)
 
-botonClientes = Button(miFrame, text = "2. Gestión de clientes", width = "30", 
-cursor = "pirate", font = ("Time News Roman", 10), command = ventanaGestionClientes).place(x = 450, y = 150)
+        
+    botonCrear = Button(newWindow, text = "Modificar suscripción", command = lambda: ejecutaModSuscripcion(dniCliente, suscripcionCliente))
+    botonCrear.grid(row = 7, column = 0, padx = 10, pady = 10)
 
-botonEntrenadores = Button(miFrame, text = "3. Gestión de entrenadores", width = "30", 
-cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 250)
+    botonSalir = Button(newWindow, text = "Volver", command = newWindow.destroy)
+    botonSalir.grid(row = 7, column = 1, padx = 10, pady = 10)
 
-botonClases = Button(miFrame, text = "4. Gestión de clases", width = "30", 
-cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 350)
+def ejecutaModSuscripcion(dniC, susC):
+    dni = dniC.get()
+    sus = susC.get()
+    clientes.gestionarSuscripcion(conn, dni, sus)
 
-botonInstalaciones = Button(miFrame, text = "5. Gestión de instalaciones", width = "30", 
-cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 450)
+def apuntarClienteInterfaz():
+    newWindow = Toplevel()
+    newWindow.config(width = "1080", height = "720", bd = "10", relief = "sunken")
+    etiquetaInformacion = Label(newWindow, 
+    font = ("Time News Roman", 10), text = "Introduzca los datos del cliente.")
+    etiquetaInformacion.place(x = 300, y = 0)
 
-botonSalir = Button(miFrame, text = "6. Salir", width = "30", 
-cursor = "pirate", font = ("Time News Roman", 10), command = raiz.destroy).place(x = 450, y = 550)
+    dniCliente = StringVar()
+    label = Label(newWindow, text = camposCliente[0], font = ("Time News Roman", 10)).grid(row = 0, column = 0, padx = 10, pady = 10)
+    entry = Entry(newWindow, textvariable = dniCliente)
+    entry.grid(row = 0, column = 1)
 
-raiz.mainloop()
+    idClase = StringVar()
+    label = Label(newWindow, text = "ID de la clase", font = ("Time News Roman", 10)).grid(row = 1, column = 0, padx = 10, pady = 10)
+    entry = Entry(newWindow, textvariable = idClase)
+    entry.grid(row = 1, column = 1)
+
+        
+    botonCrear = Button(newWindow, text = "Apuntar a clase", command = lambda: ejecutaApuntar(dniCliente, idClase))
+    botonCrear.grid(row = 7, column = 0, padx = 10, pady = 10)
+
+    botonSalir = Button(newWindow, text = "Volver", command = newWindow.destroy)
+    botonSalir.grid(row = 7, column = 1, padx = 10, pady = 10)
+
+def ejecutaApuntar(dniC, idC):
+    dni = dniC.get()
+    id = idC.get()
+
+    clientes.apuntarAClase(conn, dni, id)
