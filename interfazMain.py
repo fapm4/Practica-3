@@ -9,8 +9,7 @@ import pyodbc
 raiz = Tk()
 
 raiz.title("Practica 3 - DDSI")
-#raiz.geometry("1080x720")
-
+ 
 def conectaBase():
     try:
         conn = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=oracle0.ugr.es;Service Name=practbd.oracle0.ugr.es;User ID=x8768206;Password=x8768206')
@@ -41,7 +40,7 @@ def ventanaGestionClientes():
     cursor = "pirate", font = ("Time News Roman", 10), command = borrarClienteInterfaz).place(x = 450, y = 100)
 
     botonModificarCliente = Button(newWindow, text = "3. Modificar datos de un cliente", width = "30", 
-    cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 150)
+    cursor = "pirate", font = ("Time News Roman", 10), command = modificarClienteInterfaz).place(x = 450, y = 150)
 
     botonGestionarSuscripcion = Button(newWindow, text = "4. Gestionar la suscripción de un cliente'", width = "30", 
     cursor = "pirate", font = ("Time News Roman", 10)).place(x = 450, y = 200)
@@ -110,6 +109,37 @@ def borrarClienteInterfaz():
 def ejecutaBorrar(dato):
     result = dato.get()
     clientes.borrarCliente(conn, result)
+
+def modificarClienteInterfaz():
+    newWindow = Toplevel()
+    newWindow.config(width = "1080", height = "720", bd = "10", relief = "sunken")
+    etiquetaInformacion = Label(newWindow, 
+    font = ("Time News Roman", 10), text = "Introduzca los datos del cliente.")
+    etiquetaInformacion.place(x = 300, y = 0)
+
+    variables = [StringVar(), StringVar(), StringVar(), StringVar(), StringVar(), StringVar(), StringVar()]
+
+    for i in range(0, len(camposCliente)):
+
+        if i == 6:
+            label = Label(newWindow, text = "Nuevo dni", font = ("Time News Roman", 10)).grid(row = i, column = 0, padx = 10, pady = 10)
+        else:
+            label = Label(newWindow, text = camposCliente[i], font = ("Time News Roman", 10)).grid(row = i, column = 0, padx = 10, pady = 10)
+        entry = Entry(newWindow, textvariable = variables[i])
+        entry.grid(row = i, column = 1)
+        
+    botonCrear = Button(newWindow, text = "Modificar Usuario", command = lambda: ejecutaModificar(variables))
+    botonCrear.grid(row = 7, column = 0, padx = 10, pady = 10)
+
+    botonSalir = Button(newWindow, text = "Volver", command = newWindow.destroy)
+    botonSalir.grid(row = 7, column = 1, padx = 10, pady = 10)
+
+def ejecutaModificar(dato):
+    for i in range(0, len(camposCliente)):
+        result = dato[i].get()
+        datosCliente[i] = result
+    
+    clientes.modificarCliente(conn, datosCliente)
 
 ###################################################################################################################################
 miFrame = Frame()

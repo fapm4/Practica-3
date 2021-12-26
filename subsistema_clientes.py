@@ -183,15 +183,25 @@ def borrarCliente(conn, dato):
     else:
         print("El cliente no existe")
 
-def modificarCliente(conn):
+def modificarCliente(conn, datos):
 
-    dniCliente = str(input("DNI: "))
+    if(len(datos) != 0):
+        dniCliente = datos[0]
+    else:
+        dniCliente = ""
 
     if buscaDato(conn, dniCliente, "clientes") == 0:
-        nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente = pedirDatosCliente(False)
+
+        if(len(datos) != 0):
+            (dniCliente, nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, dniNuevo) = datos
+
+        else:
+            nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente = pedirDatosCliente(False)
+            dniNuevo = str(input("DNI nuevo: "))
+
         tel = convierteTelefono(telefonoCliente)
 
-        dniNuevo = str(input("DNI nuevo: "))
+        
         sentencia = """
         UPDATE CLIENTES 
         SET TELEFONO = '%s', NOMBRE = '%s', APELLIDOS = '%s', 
