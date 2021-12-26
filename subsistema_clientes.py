@@ -7,6 +7,8 @@
 
 import pyodbc
 import os
+import tkinter
+from tkinter import *
 import inicializa
 from time import gmtime, strftime
 
@@ -81,8 +83,16 @@ def convierteTelefono(telefonoCliente):
 
 def muestraExcepcion(ex):
 
-    tipoError = ['CONTROL_CORREO', 'CONTROL_TELEFONO', 'CK_CLIENTES', 'UK_CLIENTES_TELEFONO', 'UK_CLIENTES_CORREO',
-    'CONTROL_SUSCRIPCION', 'CONTROL_DNI', 'CONTROL_LONGITUD_TELEFONO', 'CONTROL_CLASES_APUNTADAS', 'PK_APUNTADO']
+    tipoError = ['CONTROL_CORREO', 
+    'CONTROL_TELEFONO', 
+    'CK_CLIENTES', 
+    'UK_CLIENTES_TELEFONO', 
+    'UK_CLIENTES_CORREO',
+    'CONTROL_SUSCRIPCION', 
+    'CONTROL_DNI', 
+    'CONTROL_LONGITUD_TELEFONO', 
+    'CONTROL_CLASES_APUNTADAS', 
+    'PK_APUNTADO']
 
     mensajeError = [
         "El formato del correo no sigue el formato _@_._",
@@ -96,22 +106,25 @@ def muestraExcepcion(ex):
         "Se ha alcanzado el máximo de clases por mes",
         "Cliente ya apuntado a esa clase"]
 
-    stop = False
+    stop = True
     print('----------------------------------------------')
     for i in range(0, len(mensajeError)):
         if tipoError[i] in str(ex):
             print(mensajeError[i])
             stop = False
-        else: 
-            stop = True
+
     print('----------------------------------------------')
    
     if stop == True:
         print(ex)
 
-def anadirCliente(conn):
+def anadirCliente(conn, datos):
 
-    dniCliente = ""
+    if(len(datos) != 0):
+        dniCliente = datos[0]
+    else:
+        dniCliente = ""
+
     while(dniCliente == ""):
         dniCliente = str(input("DNI: "))
         if campoVacio(dniCliente):
@@ -122,8 +135,12 @@ def anadirCliente(conn):
     if buscaDato(conn, dniCliente, "clientes") == 0:
         print("El cliente ya existe")
     else:
-        (nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente) = pedirDatosCliente(True)
-        tel = convierteTelefono(telefonoCliente)
+        if(len(datos) != 0):
+            (dniCliente, nombreCliente, apellidosCliente, correoCliente, direccionCliente, tel, suscripcionCliente) = datos
+        else:
+            (nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente) = pedirDatosCliente(True)
+            tel = convierteTelefono(telefonoCliente)
+        
         insertaCliente = """
             INSERT INTO CLIENTES 
             (DNI, NOMBRE, APELLIDOS, CORREO, DIRECCION, TELEFONO, TIPO_SUSCRIPCION, CLASES_APUNTADAS) 
@@ -163,8 +180,6 @@ def modificarCliente(conn):
 
     dniCliente = str(input("DNI: "))
 
-    # Trigger
-
     if buscaDato(conn, dniCliente, "clientes") == 0:
         nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente = pedirDatosCliente(False)
         tel = convierteTelefono(telefonoCliente)
@@ -191,7 +206,6 @@ def modificarCliente(conn):
 def gestionarSuscripcion(conn):
     dniCliente = str(input("DNI: "))
 
-    # Trigger y check sobre suscripcion
     if buscaDato(conn, dniCliente, "clientes") == 0:
         tipoSuscripcion = str(input("Introduce el nuevo tipo de suscripción: "))
         sentencia = """
@@ -235,7 +249,8 @@ def apuntarAClase(conn):
 
             # Primero miro el aforo de la clase
             sentencia = """
-            SELECT AFORO FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i AND L.ID_INSTALACION = (SELECT I.ID_INSTALACION FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i);
+            SELECT AFORO FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i 
+            AND L.ID_INSTALACION = (SELECT I.ID_INSTALACION FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i);
             """%(int(idClase), int(idClase))
             try:
                 with conn.cursor() as cursor:
@@ -315,6 +330,7 @@ def mostrarClasesDeCliente(conn):
     dniCliente = str(input("DNI: "))
 
     if buscaDato(conn, dniCliente, "clientes") == 0:
+        
         sentencia = """
         SELECT C.ID_CLASE, TEMATICA, HORARIO, I.ID_INSTALACION, AFORO 
         FROM CLASE C, INSTALACION I, APUNTADO A, LUGAR L 
@@ -363,7 +379,7 @@ def gestionClientes(conn):
 
         os.system('cls' if os.name == 'nt' else 'clear')
         if val == 1:
-            anadirCliente(conn)
+            anadirCliente(conn, [])
         elif val == 2:
             borrarCliente(conn)
         elif val == 3:

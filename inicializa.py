@@ -6,7 +6,7 @@
 
 # In[ ]:
 
-import pyodbc
+#import pyodbc
 
 def createTables(conn):
 
@@ -233,3 +233,7 @@ def dropBD(conn):
             with conn.cursor() as cursor:
                 cursor.rollback()
         i+=1
+
+def main(conn):
+    dropBD(conn)
+    createTables(conn)

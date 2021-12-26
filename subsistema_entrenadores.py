@@ -4,7 +4,6 @@
 # Practica 3
 
 import pyodbc
-
 import os
 
 from time import gmtime, strftime

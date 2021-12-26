@@ -12,6 +12,7 @@ import subsistema_clientes
 import subsistema_clases
 import subsistema_instalacion
 import os
+import sys
 
 from time import gmtime, strftime
 
@@ -27,6 +28,8 @@ def conectaBase():
         print(ex)
         
     return conn
+
+
 
 def main():
     conn = conectaBase()
@@ -65,4 +68,4 @@ def main():
 
     conn.close()
 
-main()
+#main()
