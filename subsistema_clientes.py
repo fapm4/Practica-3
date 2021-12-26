@@ -256,6 +256,7 @@ def obtenNumClases(conn, dniCliente):
             clases = cursor.fetchone()[0]
             cursor.commit()
 
+
     except Exception as ex:
         print(ex)
 
@@ -424,3 +425,4 @@ def gestionClientes(conn):
         elif val == 7:
             mostrarClasesDeCliente(conn)
 ##########################################################################################################################
+
