@@ -14,18 +14,44 @@ def aniadeEntrenador(conn):
     try:
         print("\nIntroduzca el DNI del nuevo entrenador")
         dni_entrenador=str(input())
+
+        while len(dni_entrenador) > 9:
+            print("\nEl DNI no puede tener mas de 9 caracteres\nIntroduzca de nuevo el DNI del nuevo entrenador")
+            dni_entrenador=str(input())
+
         print("Introduzca el nombre del nuevo entrenador")
         nombre_entrenador=str(input())
+
+        while len(nombre_entrenador) > 20:
+            print("\nEl nombre no puede tener mas de 20 caracteres\nIntroduzca de nuevo el nombre del nuevo entrenador")
+            nombre_entrenador=str(input())
+
         print("Introduzca los apellidos del nuevo entrenador")
         apellidos_entrenador=str(input())
+
+        while len(apellidos_entrenador) > 40:
+            print("\nLos apellidos no pueden tener mas de 40 caracteres\nIntroduzca de nuevo los apellidos del nuevo entrenador")
+            apellidos_entrenador=str(input())
+
         print("Introduzca la direccion del nuevo entrenador")
         direccion_entrenador=str(input())
+
+        while len(direccion_entrenador) > 60:
+            print("\nLa direccion no puede tener mas de 60 caracteres\nIntroduzca de nuevo la direccion del nuevo entrenador")
+            direccion_entrenador=str(input())
+
         print("Introduzca el correo del nuevo entrenador")
         correo_entrenador=str(input())
+
+        while len(correo_entrenador) > 60:
+            print("\nEl correo no puede tener mas de 60 caracteres\nIntroduzca de nuevo el correo del nuevo entrenador")
+            correo_entrenador=str(input())
+
         print("Introduzca el telefono del nuevo entrenador")
         n_telefono=int(input())
+
         espe=15
-        while espe > 3:
+        while not (0 < espe < 4):
             print("Introduzca la especialidad del nuevo entrenador\n")
             print("1. Raqueta\n")
             print("2. Equipo\n")
@@ -113,7 +139,7 @@ def salario(conn):
             salario=0
 
             if not horario:
-                print("\nEl entrenador seleccionado no imparte ninguna clase")
+                print("\nEl entrenador seleccionado no imparte ninguna clase\n\n")
             else:
                 for hora in horario:
                     salario+=3
@@ -125,7 +151,7 @@ def salario(conn):
 
                     with conn.cursor() as cursor:
                         cursor.execute(insertar)
-                        cursor.commit(  )
+                        cursor.commit()
 
                 except Exception as ex:
                     print(ex)
@@ -173,7 +199,7 @@ def horario(conn):
 
 def muestraEntrenadores(conn):
     try:
-        consulta =  "SELECT DNI,NOMBRE,APELLIDOS,ESPECIALIDAD FROM ENTRENADORES"
+        consulta = "SELECT DNI,NOMBRE,APELLIDOS,ESPECIALIDAD FROM ENTRENADORES"
 
         with conn.cursor() as cursor:           
             cursor.execute(consulta)
@@ -194,8 +220,8 @@ def muestraEntrenadores(conn):
 def gestionEntrenadores(conn):
     opcion=1
 
-    while 0 < opcion < 6:
-        print('Gestión de Entrenadores\nPor favor indique la gestion a realizar\n')
+    while opcion != 6:
+        print('Gestión de Entrenadores\n\nPor favor indique la gestión a realizar\n')
         print('1. Añadir un nuevo entrenador\n')
         print('2. Borrar un entrenador\n')
         print('3. Calcular el salario de un entrenador\n')

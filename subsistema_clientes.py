@@ -11,6 +11,7 @@ import tkinter
 from tkinter import *
 import inicializa
 from time import gmtime, strftime
+import subsistema_clases
 
 
 ##########################################################################################################################
@@ -145,7 +146,11 @@ def anadirCliente(conn, datos):
         insertaCliente = """
             INSERT INTO CLIENTES 
             (DNI, NOMBRE, APELLIDOS, CORREO, DIRECCION, TELEFONO, TIPO_SUSCRIPCION, CLASES_APUNTADAS) 
+<<<<<<< HEAD
             values ('%s', '%s', '%s', '%s', '%s', %i, '%s', %i)
+=======
+            VALUES ('%s', '%s', '%s', '%s', '%s', %i, '%s', %i)
+>>>>>>> main
         """%(dniCliente, nombreCliente, apellidosCliente, correoCliente,
             direccionCliente, tel, suscripcionCliente, 0)
 
@@ -191,6 +196,7 @@ def modificarCliente(conn, datos):
         dniCliente = ""
 
     if buscaDato(conn, dniCliente, "clientes") == 0:
+<<<<<<< HEAD
 
         if(len(datos) != 0):
             (dniCliente, nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, dniNuevo) = datos
@@ -201,6 +207,18 @@ def modificarCliente(conn, datos):
 
         tel = convierteTelefono(telefonoCliente)
 
+=======
+
+        if(len(datos) != 0):
+            (dniCliente, nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, dniNuevo) = datos
+
+        else:
+            nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente = pedirDatosCliente(False)
+            dniNuevo = str(input("DNI nuevo: "))
+
+        tel = convierteTelefono(telefonoCliente)
+
+>>>>>>> main
         
         sentencia = """
         UPDATE CLIENTES 
@@ -256,9 +274,16 @@ def obtenNumClases(conn, dniCliente):
             clases = cursor.fetchone()[0]
             cursor.commit()
 
+<<<<<<< HEAD
     except Exception as ex:
         print(ex)
 
+=======
+
+    except Exception as ex:
+        print(ex)
+
+>>>>>>> main
     return clases
 
 def apuntarAClase(conn, dni, idclase):
@@ -272,6 +297,10 @@ def apuntarAClase(conn, dni, idclase):
         if(idclase != ""):
             idClase = idclase
         else:
+<<<<<<< HEAD
+=======
+            subsistema_clases.mostrar_clases(conn)
+>>>>>>> main
             idClase = str(input("ID de la clase: "))
         
         # Busco la clase
@@ -280,9 +309,18 @@ def apuntarAClase(conn, dni, idclase):
 
             # Primero miro el aforo de la clase
             sentencia = """
+<<<<<<< HEAD
             SELECT AFORO FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i 
             AND L.ID_INSTALACION = (SELECT I.ID_INSTALACION FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i);
             """%(int(idClase), int(idClase))
+=======
+            SELECT AFORO FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i AND L.ID_INSTALACION = I.ID_INSTALACION
+            AND L.ID_INSTALACION = (SELECT DISTINCT(I.ID_INSTALACION) 
+            FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i AND L.ID_INSTALACION = I.ID_INSTALACION)
+            """%(int(idClase), int(idClase))
+
+            #print(sentencia)
+>>>>>>> main
             try:
                 with conn.cursor() as cursor:
                     cursor.execute(sentencia)
@@ -303,7 +341,11 @@ def apuntarAClase(conn, dni, idclase):
                 print(ex)
 
             # Si queda espacio, meto al cliente
+<<<<<<< HEAD
             if(aforoActual <= aforoMaximo):
+=======
+            if(aforoActual + 1 <= aforoMaximo):
+>>>>>>> main
                 # Después miro el tipo de suscripcion y el número de clases mensual
                 clases = obtenNumClases(conn, dniCliente)
                 # Actualizo el número de clases
@@ -326,8 +368,16 @@ def apuntarAClase(conn, dni, idclase):
 
                 except Exception as ex:
                     muestraExcepcion(ex)
+<<<<<<< HEAD
         else:
             print("La clase no existe")
+=======
+
+            else:
+                print("Aforo máximo completado")
+        else:
+            print("No existe la clase")
+>>>>>>> main
         
     else:
         print("El cliente no existe")
@@ -423,4 +473,9 @@ def gestionClientes(conn):
             muestraClientes(conn)
         elif val == 7:
             mostrarClasesDeCliente(conn)
+<<<<<<< HEAD
 ##########################################################################################################################
+=======
+##########################################################################################################################
+
+>>>>>>> main
