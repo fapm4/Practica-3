@@ -38,6 +38,7 @@ def buscaDato(conn, dato, tabla):
                 
     except Exception as ex:
         print(ex)
+        conn.rollback()
         
     return existe
 
@@ -135,6 +136,7 @@ def anadirCliente(conn, datos):
 
     if buscaDato(conn, dniCliente, "clientes") == 0:
         print("El cliente ya existe")
+        conn.rollback()
     else:
         if(len(datos) != 0):
             (dniCliente, nombreCliente, apellidosCliente, correoCliente, direccionCliente, telefonoCliente, suscripcionCliente) = datos
@@ -159,6 +161,7 @@ def anadirCliente(conn, datos):
 
         except Exception as ex:
             muestraExcepcion(ex)
+            conn.rollback()
 
 def borrarCliente(conn, dato):
 
@@ -181,8 +184,10 @@ def borrarCliente(conn, dato):
                 cursor.commit()
         except Exception as ex:
             print(ex)
+            conn.rollback()
     else:
         print("El cliente no existe")
+        conn.rollback()
 
 def modificarCliente(conn, datos):
 
@@ -216,8 +221,10 @@ def modificarCliente(conn, datos):
                 cursor.commit()
         except Exception as ex:
             muestraExcepcion(ex)
+            conn.rollback()
     else:
         print("El cliente no existe")
+        conn.rollback()
 
 
 
@@ -243,8 +250,10 @@ def gestionarSuscripcion(conn, dni, sus):
                 cursor.commit()
         except Exception as ex:
             muestraExcepcion(ex)
+            conn.rollback()
     else:
         print("El cliente no existe")
+        conn.rollback()
 
 
 def obtenNumClases(conn, dniCliente):
@@ -260,6 +269,7 @@ def obtenNumClases(conn, dniCliente):
 
     except Exception as ex:
         print(ex)
+        conn.rollback()
 
     return clases
 
@@ -278,7 +288,7 @@ def reiniciaClases(conn, dniCliente):
                 """%(dniCliente)
     except Exception as ex:
         print(ex)
-
+        conn.rollback()
 
 def apuntarAClase(conn, dni, idclase):
 
@@ -314,6 +324,7 @@ def apuntarAClase(conn, dni, idclase):
                     aforoMaximo = cursor.fetchone()[0]
             except Exception as ex:
                 print(ex)
+                conn.rollback()
     
             # Después busco en apuntados
             sentencia = """
@@ -326,6 +337,7 @@ def apuntarAClase(conn, dni, idclase):
                     aforoActual = cursor.fetchone()[0]
             except Exception as ex:
                 print(ex)
+                conn.rollback()
 
             # Si queda espacio, meto al cliente
             if(aforoActual + 1 <= aforoMaximo):
@@ -351,14 +363,17 @@ def apuntarAClase(conn, dni, idclase):
 
                 except Exception as ex:
                     muestraExcepcion(ex)
+                    conn.rollback()
 
             else:
                 print("Aforo máximo completado")
+                conn.rollback()
         else:
             print("No existe la clase")
-        
+            conn.rollback()
     else:
         print("El cliente no existe")
+        conn.rollback()
 
 def muestraClientes(conn):
     try:
@@ -451,4 +466,6 @@ def gestionClientes(conn):
             muestraClientes(conn)
         elif val == 7:
             mostrarClasesDeCliente(conn)
+
+        conn.commit()
 ##########################################################################################################################
