@@ -17,10 +17,10 @@ import os
 from time import gmtime, strftime
 
 def conectaBase():
+    conn = type(pyodbc.connect)
     try:
         conn = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=oracle0.ugr.es;Service Name=practbd.oracle0.ugr.es;User ID=x8768206;Password=x8768206')
         conn.autocommit = False
-        cursor = conn.cursor()
         
     except Exception as ex:
         print(ex)
@@ -48,7 +48,7 @@ def main():
         os.system('cls' if os.name == 'nt' else 'clear')
         if val != 5:
             if val == 0:
-                #inicializa.dropBD(conn)
+                inicializa.dropBD(conn)
                 inicializa.createTables(conn)
             elif val == 1:
                 subsistema_clientes.gestionClientes(conn)

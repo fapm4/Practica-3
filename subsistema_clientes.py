@@ -263,7 +263,26 @@ def obtenNumClases(conn, dniCliente):
 
     return clases
 
+def reiniciaClases(conn, dniCliente):
+    sentencia = "SELECT CURRENT_DATE FROM DUAL"
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(sentencia)
+
+            fecha = cursor.fetchone()
+            dia = fecha[0:2]
+            if dia == "01":
+                sentencia = """
+                UPDATE CLIENTES SET 
+                CLASES_APUNTADAS = 0 WHERE DNI = '%s'
+                """%(dniCliente)
+    except Exception as ex:
+        print(ex)
+
+
 def apuntarAClase(conn, dni, idclase):
+
+    reiniciaClases(conn, dni)
     if(dni != ""):
         dniCliente = dni
     else:
@@ -433,4 +452,3 @@ def gestionClientes(conn):
         elif val == 7:
             mostrarClasesDeCliente(conn)
 ##########################################################################################################################
-
