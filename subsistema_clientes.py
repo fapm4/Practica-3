@@ -286,6 +286,10 @@ def reiniciaClases(conn, dniCliente):
                 UPDATE CLIENTES SET 
                 CLASES_APUNTADAS = 0 WHERE DNI = '%s'
                 """%(dniCliente)
+                
+                with conn.cursor() as cursor:
+                    cursor.execute(sentencia)
+                    
     except Exception as ex:
         print(ex)
         conn.rollback()
