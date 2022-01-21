@@ -27,7 +27,7 @@ def createTables(conn):
             APELLIDOS VARCHAR2(40),
             CORREO VARCHAR2(60),
             DIRECCION VARCHAR2(60),
-            TELEFONO NUMBER,
+            TELEFONO NUMBER(9),
             ESPECIALIDAD VARCHAR2(30) CHECK (ESPECIALIDAD='Raqueta' OR ESPECIALIDAD='Equipo' OR ESPECIALIDAD='Personal') ,
             SALARIO NUMBER DEFAULT 0,
             CONSTRAINT PK_ENTRENADORES PRIMARY KEY (DNI),
@@ -37,27 +37,6 @@ def createTables(conn):
 
         with conn.cursor() as cursor: 
             cursor.execute(createEntrenadores)
-            cursor.commit()
-
-        trigger_entrenadores='''
-            CREATE OR REPLACE TRIGGER existe
-            BEFORE INSERT ON ENTRENADORES
-            FOR EACH ROW 
-            DECLARE
-                cuantos NUMBER(1):=0;
-                aux_dni ENTRENADORES.DNI%TYPE;
-            BEGIN
-                SELECT COUNT(*) INTO cuantos FROM ENTRENADORES
-                WHERE DNI = :new.DNI;
-                IF (cuantos>0) THEN
-                    SELECT DNI INTO aux_dni FROM ENTRENADORES WHERE DNI=:NEW.DNI;
-                    RAISE_APPLICATION_ERROR(-20601,aux_dni||' ese DNI ya existe en la base de datos');
-                END IF;
-            END;
-        '''
-
-        with conn.cursor() as cursor: 
-            cursor.execute(trigger_entrenadores)
             cursor.commit()
 
         createClientes = '''CREATE TABLE CLIENTES(
@@ -163,58 +142,7 @@ def createTables(conn):
         """
 
         with conn.cursor() as cursor: 
-            cursor.execute(triggerInstalacion)
-
-        triggerEntrenador = """
-            create or replace trigger NO_OCUPADA
-            before insert 
-            ON LUGAR
-            FOR EACH ROW
-
-            DECLARE 
-                v_horario_instalacion  clase.horario%TYPE;
-                fechaAux clase.horario%TYPE;
-
-                    
-            BEGIN
-                select horario INTO fechaAux from clase where id_clase=:new.id_clase;
-
-                FOR I IN(SELECT * FROM LUGAR WHERE id_instalacion=:new.id_instalacion)
-                    LOOP
-                    SELECT HORARIO into v_horario_instalacion FROM CLASE WHERE id_clase=I.id_clase;
-                    IF (v_horario_instalacion=fechaAux) then
-                            raise_application_error(-20600,:new.id_instalacion ||' La instalación está ocupada a la en el horario de esa clase.'); 
-                    END IF;
-                    END LOOP;
-            END;
-        """
-
-        trigger_entrenadores='''
-            CREATE OR REPLACE TRIGGER existe
-            BEFORE INSERT ON ENTRENADORES
-            FOR EACH ROW 
-            DECLARE
-                cuantos NUMBER(1):=0;
-                aux_dni ENTRENADORES.DNI%TYPE;
-            BEGIN
-                SELECT COUNT(*) INTO cuantos FROM ENTRENADORES
-                WHERE DNI = :new.DNI;
-                IF (cuantos>0) THEN
-                    SELECT DNI INTO aux_dni FROM ENTRENADORES WHERE DNI=:NEW.DNI;
-                    RAISE_APPLICATION_ERROR(-20601,aux_dni||' ese DNI ya existe en la base de datos');
-                END IF;
-            END;
-        '''
-
-        with conn.cursor() as cursor: 
-            cursor.execute(trigger_entrenadores)
-            cursor.commit()
-
-        with conn.cursor() as cursor: 
-            cursor.commit()
-                
-        with conn.cursor() as cursor: 
-            cursor.execute(triggerEntrenador)
+            cursor.execute(triggerInstalacion)        
 
         triggerCaracterTelefono = '''
         CREATE OR REPLACE TRIGGER CONTROL_TELEFONO
@@ -312,6 +240,90 @@ def createTables(conn):
             cursor.execute(triggerControlClasesApuntadas)
             cursor.commit()
 
+        triggerEntrenador = """
+            create or replace trigger NO_OCUPADA
+            before insert 
+            ON LUGAR
+            FOR EACH ROW
+
+            DECLARE 
+                v_horario_instalacion  clase.horario%TYPE;
+                fechaAux clase.horario%TYPE;
+
+                    
+            BEGIN
+                select horario INTO fechaAux from clase where id_clase=:new.id_clase;
+
+                FOR I IN(SELECT * FROM LUGAR WHERE id_instalacion=:new.id_instalacion)
+                    LOOP
+                    SELECT HORARIO into v_horario_instalacion FROM CLASE WHERE id_clase=I.id_clase;
+                    IF (v_horario_instalacion=fechaAux) then
+                            raise_application_error(-20600,:new.id_instalacion ||' La instalación está ocupada a la en el horario de esa clase.'); 
+                    END IF;
+                    END LOOP;
+            END;
+        """
+
+        with conn.cursor() as cursor: 
+            cursor.execute(triggerEntrenador)
+            cursor.commit()
+
+        trigger_entrenadores='''
+            CREATE OR REPLACE TRIGGER existe
+            BEFORE INSERT ON ENTRENADORES
+            FOR EACH ROW 
+            DECLARE
+                cuantos NUMBER(1):=0;
+                aux_dni ENTRENADORES.DNI%TYPE;
+            BEGIN
+                SELECT COUNT(*) INTO cuantos FROM ENTRENADORES
+                WHERE DNI = :new.DNI;
+                IF (cuantos>0) THEN
+                    SELECT DNI INTO aux_dni FROM ENTRENADORES WHERE DNI=:NEW.DNI;
+                    RAISE_APPLICATION_ERROR(-20601,aux_dni||' ese DNI ya existe en la base de datos');
+                END IF;
+            END;
+        '''
+
+        with conn.cursor() as cursor: 
+            cursor.execute(trigger_entrenadores)
+            cursor.commit()
+            
+        triggerDNIcorrecto = '''
+            CREATE OR REPLACE TRIGGER letraDNI
+            BEFORE INSERT OR UPDATE OF DNI ON ENTRENADORES 
+            FOR EACH ROW
+            DECLARE
+                LETRA VARCHAR2(1);
+            BEGIN
+                SELECT SUBSTR(:new.DNI,9,9) INTO LETRA FROM DUAL;
+                IF (:new.DNI NOT LIKE '_________') THEN
+                    raise_application_error(-20603,'El DNI ha de tener 9 caracteres');
+                ELSE 
+                    IF LETRA NOT IN ('A' ,'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'W', 'X', 'Y', 'Z') THEN
+                        raise_application_error(-20603,'El ultimo caracter del DNI ha de ser una letra');
+                    END IF;
+                END IF; 
+            END;'''
+
+        with conn.cursor() as cursor: 
+            cursor.execute(triggerDNIcorrecto)
+            cursor.commit()
+
+        triggerLargoTlfe = '''
+            CREATE OR REPLACE TRIGGER largotlf
+            BEFORE INSERT ON ENTRENADORES 
+            FOR EACH ROW
+            WHEN (new.telefono NOT LIKE '_________')
+            BEGIN
+                raise_application_error(-20601,'El telefono ha de tener 9 digitos');
+            END;
+        '''
+
+        with conn.cursor() as cursor: 
+            cursor.execute(triggerLargoTlfe)
+            cursor.commit()
+
 
     except Exception as ex:
         print(ex)
@@ -335,3 +347,4 @@ def dropBD(conn):
             with conn.cursor() as cursor:
                 cursor.rollback()
         i+=1
+
