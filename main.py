@@ -41,8 +41,7 @@ def main():
         print('3. Gestión de Clases')
         print('4. Gestión de Instalaciones')
         print('5. Salir')
-        print('Introduce opción: ')
-        val = int(input())
+        val = int(input("Introduce una opción: "))
         
         os.system('cls' if os.name == 'nt' else 'clear')
         if val != 5:

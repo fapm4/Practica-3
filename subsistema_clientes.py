@@ -159,6 +159,10 @@ def anadirCliente(conn, datos):
                 print(insertaCliente)
                 cursor.commit()
 
+                print("------------------------------")
+                print("""Cliente con DNI: %s insertado"""%(dniCliente))
+                print("------------------------------")
+
         except Exception as ex:
             muestraExcepcion(ex)
             conn.rollback()
@@ -171,22 +175,37 @@ def borrarCliente(conn, dato):
     else:
         dniCliente = str(input("DNI: "))
 
-
     # Vamos a buscar primero al cliente por su DNI en la tabla de CLIENTE
 
     if buscaDato(conn, dniCliente, "clientes") == 0:
         sentencia = """
         DELETE FROM CLIENTES WHERE DNI = '%s'
-        """%(dniCliente);
+        """%(dniCliente)
         try:
             with conn.cursor() as cursor:
                 cursor.execute(sentencia)
                 cursor.commit()
+
+                print("------------------------------")
+                print("""Cliente con DNI: %s borrado"""%(dniCliente))
+                print("------------------------------")
+
+                # Si estaba apuntado en alguna clase también lo tengo borrar
+                sentencia = """
+                DELETE FROM APUNTADO WHERE DNI = '%s'
+                """%(dniCliente)
+
+                with conn.cursor() as cursor:
+                    cursor.execute(sentencia)
+                    cursor.commit()
+
         except Exception as ex:
             print(ex)
             conn.rollback()
     else:
+        print("--------------------")
         print("El cliente no existe")
+        print("--------------------")
         conn.rollback()
 
 def modificarCliente(conn, datos):
@@ -219,6 +238,11 @@ def modificarCliente(conn, datos):
             with conn.cursor() as cursor:
                 cursor.execute(sentencia)
                 cursor.commit()
+
+                print("------------------------------")
+                print("""Cliente con DNI: %s modificado"""%(dniCliente))
+                print("------------------------------")
+
         except Exception as ex:
             muestraExcepcion(ex)
             conn.rollback()
@@ -250,6 +274,11 @@ def gestionarSuscripcion(conn, dni, sus):
             with conn.cursor() as cursor:
                 cursor.execute(sentencia)
                 cursor.commit()
+
+                print("------------------------------")
+                print("""Cliente con DNI: %s modificado"""%(dniCliente))
+                print("------------------------------")
+
         except Exception as ex:
             muestraExcepcion(ex)
             conn.rollback()
@@ -290,7 +319,7 @@ def reiniciaClases(conn, dniCliente):
                 UPDATE CLIENTES SET 
                 CLASES_APUNTADAS = 0 WHERE DNI = '%s'
                 """%(dniCliente)
-                
+
                 print("------------------------------")
                 print("Clases del cliente reiniciadas")
                 print("------------------------------")
@@ -376,9 +405,11 @@ def apuntarAClase(conn, dni, idclase):
 
                             cursor.execute(sentencia)
                             cursor.commit()
-                            print("-----------------------------------")
-                            print("Cliente apuntado satisfactoriamente")
-                            print("-----------------------------------")
+                            print("-------------------------------------------------------------------")
+                            print("""
+                                Cliente con DNI: %s apuntado satisfactoriamente a la clase con ID: %i
+                                """%(str(dniCliente), int(idClase)))
+                            print("-------------------------------------------------------------------")
 
                     except Exception as ex:
                         muestraExcepcion(ex)
@@ -406,7 +437,6 @@ def muestraClientes(conn):
             cursor.execute("SELECT * FROM CLIENTES")
             dataClientes = cursor.fetchall()
             if len(dataClientes) != 0:
-                print("----------------------------------------")
                 for prod in dataClientes:
                     print("#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#")
                     print("DNI: %s"%(prod[0]))
@@ -418,9 +448,9 @@ def muestraClientes(conn):
                     print("Suscripción: %s"%(prod[6]))
                     print("#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#")
             else:
-                print("----------------------------------------")
+                print("----------------------------------")
                 print("No hay información de clientes aún")
-                print("----------------------------------------")
+                print("----------------------------------")
             
 
     except Exception as ex:
@@ -454,15 +484,19 @@ def mostrarClasesDeCliente(conn):
                         print("Aforo máximo: %s"%(prod[4]))
                         print("#############################################")
                 else:
+                    print("----------------------------------")
                     print("No hay información de clientes aún")
-                    print("----------------------------------------")
+                    print("----------------------------------")
         
         except Exception as ex:
             print(ex)
     else:
+        print("--------------------")
         print("El cliente no existe")
+        print("--------------------")
 
 def gestionClientes(conn):
+    os.system('cls' if os.name == 'nt' else 'clear')
     val = 1
     while(val >= 1 and val <= 7) and val != 8:
         print('Gestión de Clientes\nPor favor indique la gestion a realizar\n')
@@ -477,7 +511,6 @@ def gestionClientes(conn):
         print('Introduce opción: ')
         val = int(input())
 
-        os.system('cls' if os.name == 'nt' else 'clear')
         if val == 1:
             anadirCliente(conn, [])
         elif val == 2:
