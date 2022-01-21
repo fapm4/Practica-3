@@ -265,7 +265,7 @@ def createTables(conn):
                 IF (:NEW.DNI NOT LIKE '_________') THEN
                     raise_application_error(-20603,'Formato de DNI incorrecto');
                 ELSE 
-                    IF LETRA NOT IN ('A' ,'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'W', 'X', 'Y', 'Z') THEN
+                    IF LETRA NOT IN ('A' ,'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'W', 'X', 'Y', 'Z') THEN
                         raise_application_error(-20603,'Formato de DNI incorrecto');
                     END IF;
                 END IF; 

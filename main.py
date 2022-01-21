@@ -2,7 +2,6 @@
 # coding: utf-8
 
 # Practica 3
-
 # In[ ]:
 
 import pyodbc

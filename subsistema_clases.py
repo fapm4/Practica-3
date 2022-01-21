@@ -86,11 +86,13 @@ def mostrar_clases(conn):
     lista = cursor.fetchall()
     if(len(lista) == 0):
         print("\nNo hay clases disponibles.\n")
+        return 0
     else:
         for row in lista:
             msg = ("ID: %s Temática: %s  Fecha: %s")%(row[0],row[1],row[2])
             print(msg)
             print("\n")
+        return 1
 
 
 def hayclases(conn):
