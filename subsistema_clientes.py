@@ -60,7 +60,6 @@ def pedirDatosCliente(nuevo):
         p = 5
 
     for i in range(0, p):
-
         aux = ""
         while(campoVacio(aux)):
 
@@ -71,12 +70,14 @@ def pedirDatosCliente(nuevo):
         
             else:
                 val[i] = aux
+
     return val
 
 def convierteTelefono(telefonoCliente):
     try:
         toDev = int(telefonoCliente)
     except Exception as ex:
+
         if isinstance(ex, ValueError):
             #print("Ha introducido una letra en el teléfono - Carácter erróneo")
             toDev = -1
@@ -226,7 +227,6 @@ def modificarCliente(conn, datos):
 
         tel = convierteTelefono(telefonoCliente)
 
-        
         sentencia = """
         UPDATE CLIENTES 
         SET TELEFONO = '%s', NOMBRE = '%s', APELLIDOS = '%s', 
@@ -251,8 +251,6 @@ def modificarCliente(conn, datos):
         print("El cliente no existe")
         print("--------------------")
         conn.rollback()
-
-
 
 def gestionarSuscripcion(conn, dni, sus):
 
@@ -288,7 +286,6 @@ def gestionarSuscripcion(conn, dni, sus):
         print("--------------------")
         conn.rollback()
 
-
 def obtenNumClases(conn, dniCliente):
     sentencia = """
     SELECT CLASES_APUNTADAS FROM CLIENTES WHERE DNI ='%s'
@@ -298,7 +295,6 @@ def obtenNumClases(conn, dniCliente):
             cursor.execute(sentencia)
             clases = cursor.fetchone()[0]
             cursor.commit()
-
 
     except Exception as ex:
         print(ex)
@@ -386,7 +382,7 @@ def apuntarAClase(conn, dni, idclase):
 
                 # Si queda espacio, meto al cliente
                 if(aforoActual + 1 <= aforoMaximo):
-                    # Después miro el tipo de suscripcion y el número de clases mensual
+                    # Después miro el tipo de suscripcion y el número de clases mensual -> Trigger
                     clases = obtenNumClases(conn, dniCliente)
                     # Actualizo el número de clases
                     sentencia = """
@@ -406,9 +402,7 @@ def apuntarAClase(conn, dni, idclase):
                             cursor.execute(sentencia)
                             cursor.commit()
                             print("-------------------------------------------------------------------")
-                            print("""
-                                Cliente con DNI: %s apuntado satisfactoriamente a la clase con ID: %i
-                                """%(str(dniCliente), int(idClase)))
+                            print("Cliente con DNI: %s apuntado satisfactoriamente a la clase con ID: %i"%(str(dniCliente), int(idClase)))
                             print("-------------------------------------------------------------------")
 
                     except Exception as ex:
@@ -462,17 +456,24 @@ def mostrarClasesDeCliente(conn):
     if buscaDato(conn, dniCliente, "clientes") == 0:
         
         sentencia = """
-        SELECT C.ID_CLASE, TEMATICA, HORARIO, I.ID_INSTALACION, AFORO 
+        SELECT C.ID_CLASE, TEMATICA, HORARIO, I.ID_INSTALACION, AFORO
         FROM CLASE C, INSTALACION I, APUNTADO A, LUGAR L 
         WHERE DNI = '%s' AND A.DNI = '%s'
         AND A.ID_CLASE = C.ID_CLASE
         AND L.ID_CLASE = C.ID_CLASE;
         """%(dniCliente, dniCliente)
 
+        sentenciaAforo = """
+        SELECT COUNT(DNI) FROM APUNTADO """
+
         try:
             with conn.cursor() as cursor:
                 cursor.execute(sentencia)
                 dataClientes = cursor.fetchall()
+
+                cursor.execute(sentenciaAforo)
+                aforoApuntado = cursor.fetchone();
+
                 if len(dataClientes) != 0:
                     print("----------------------------------------")
                     for prod in dataClientes:
@@ -482,11 +483,12 @@ def mostrarClasesDeCliente(conn):
                         print("Horario: %s"%(prod[2]))
                         print("ID de la instalación: %s"%(prod[3]))
                         print("Aforo máximo: %s"%(prod[4]))
+                        print("Aforo actual: %s"%(aforoApuntado[0]))
                         print("#############################################")
                 else:
-                    print("----------------------------------")
-                    print("No hay información de clientes aún")
-                    print("----------------------------------")
+                    print("----------------------------------------------")
+                    print("No hay información del cliente en alguna clase")
+                    print("----------------------------------------------")
         
         except Exception as ex:
             print(ex)
@@ -498,6 +500,7 @@ def mostrarClasesDeCliente(conn):
 def gestionClientes(conn):
     os.system('cls' if os.name == 'nt' else 'clear')
     val = 1
+    
     while(val >= 1 and val <= 7) and val != 8:
         print('Gestión de Clientes\nPor favor indique la gestion a realizar\n')
         print('1. Añadir un nuevo cliente')
