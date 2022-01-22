@@ -290,7 +290,7 @@ def createTables(conn):
             cursor.commit()
             
         triggerDNIcorrecto = '''
-            CREATE OR REPLACE TRIGGER letraDNI
+            CREATE OR REPLACE TRIGGER formatoDNI
             BEFORE INSERT OR UPDATE OF DNI ON ENTRENADORES 
             FOR EACH ROW
             DECLARE
