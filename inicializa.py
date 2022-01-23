@@ -117,6 +117,18 @@ def createTables(conn):
             cursor.execute(createLugar)
             cursor.commit()
 
+        createReservaHistorico = ''' CREATE TABLE RESERVA_HISTORICO(
+            DNI VARCHAR2(9),
+            ID_INSTALACION VARCHAR2(9),
+            FECHA DATE,
+            CONSTRAINT PK_RESERVA PRIMARY KEY(DNI),
+            CONSTRAINT FK_RESERVA_INSTALACION FOREIGN KEY(ID_INSTALACION) REFERENCES INSTALACION)
+        '''
+
+        with conn.cursor() as cursor: 
+            cursor.execute(createReservaHistorico)
+            cursor.commit()
+
         # Triggers
 
         triggerInstalacion =  """
@@ -326,6 +338,17 @@ def createTables(conn):
             cursor.execute(triggerLargoTlfe)
             cursor.commit()
 
+        triggerReservaHistorico = """CREATE TRIGGER trigger_reserva_historico
+        AFTER INSERT ON reserva
+        FOR EACH ROW
+        BEGIN
+        INSERT INTO reserva_historico(dni,id_instalacion, fecha)
+        VALUES (NEW.dni, NEW.id_instalacion, NEW.fecha, CURDATE());
+        END"""
+
+        with conn.cursor() as cursor: 
+            cursor.execute(triggerReservaHistorico)
+            cursor.commit()
 
     except Exception as ex:
         print(ex)
