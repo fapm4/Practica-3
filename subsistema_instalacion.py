@@ -98,13 +98,10 @@ def reservar_instalacion(conn):
 
     if(existe):
         consulta = "INSERT INTO RESERVA (dni,id_instalacion,fecha) values ('" + str(dni) + "'," + str(n_inst) + "," + str(f) + ")"
-        # Sustituye al trigger triggerReservaHistorico
-        consulta2 = "INSERT INTO RESERVA_HISTORICO(dni,id_instalacion,fecha) values ('" + str(dni) + "'," + str(n_inst) + "," + str(f) + ")"
         #print(consulta)
         try:
             with conn.cursor() as cursor:
                 cursor.execute(consulta)
-                cursor.execute(consulta2)
                 cursor.commit()
         except Exception as ex:
             print(ex)
