@@ -79,18 +79,6 @@ def createTables(conn):
         with conn.cursor() as cursor: 
             cursor.execute(createReserva)
             cursor.commit()
-            
-        createReservaHistorico = ''' CREATE TABLE RESERVA_HISTORICO(
-            DNI VARCHAR2(9),
-            ID_INSTALACION VARCHAR2(9),
-            FECHA DATE,
-            CONSTRAINT PK_RESERVA PRIMARY KEY(DNI),
-            CONSTRAINT FK_RESERVA_INSTALACION FOREIGN KEY(ID_INSTALACION) REFERENCES INSTALACION)
-        '''
-
-        with conn.cursor() as cursor: 
-            cursor.execute(createReservaHistorico)
-            cursor.commit()
         
         createApuntado = ''' CREATE TABLE APUNTADO(
             DNI VARCHAR2(9),
@@ -133,7 +121,7 @@ def createTables(conn):
             DNI VARCHAR2(9),
             ID_INSTALACION VARCHAR2(9),
             FECHA DATE,
-            CONSTRAINT PK_RESERVA PRIMARY KEY(DNI),
+            CONSTRAINT PK_RESERVA_HIST PRIMARY KEY(DNI),
             CONSTRAINT FK_RESERVA_INSTALACION FOREIGN KEY(ID_INSTALACION) REFERENCES INSTALACION)
         '''
 
