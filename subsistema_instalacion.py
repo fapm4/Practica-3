@@ -111,9 +111,9 @@ def cancelar_reserva(conn):
 
     if(mid != -1):
         try:
-            i = int(input("Introduzca el id de la reserva a cancelar.\n-1 para borrar todas la reservas: "))
+            i = int(input("Introduzca el id de la instalacion de la reserva a cancelar.\n-1 para borrar todas la reservas: "))
             if(i == -1):
-                consulta ="DELETE FROM INSTALACION"
+                consulta ="DELETE FROM RESERVA"
                 try:
                     cursor.execute(consulta)
                     cursor.commit()
@@ -122,7 +122,7 @@ def cancelar_reserva(conn):
                     print(ex)
                     cursor.rollback()
             elif(-1 <= i <=mid):
-                consulta = "DELETE FROM INSTALACION WHERE id_clase='%s'"%(i)
+                consulta = "DELETE FROM RESERVA WHERE id_instalacion='%s'"%(i)
 
                 try:
                     cursor.execute(consulta)
