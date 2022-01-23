@@ -270,34 +270,6 @@ def createTables(conn):
             cursor.execute(triggerControlClasesApuntadas)
             cursor.commit()
 
-        triggerEntrenador = """
-            create or replace trigger NO_OCUPADA
-            before insert 
-            ON LUGAR
-            FOR EACH ROW
-
-            DECLARE 
-                v_horario_instalacion  clase.horario%TYPE;
-                fechaAux clase.horario%TYPE;
-
-                    
-            BEGIN
-                select horario INTO fechaAux from clase where id_clase=:new.id_clase;
-
-                FOR I IN(SELECT * FROM LUGAR WHERE id_instalacion=:new.id_instalacion)
-                    LOOP
-                    SELECT HORARIO into v_horario_instalacion FROM CLASE WHERE id_clase=I.id_clase;
-                    IF (v_horario_instalacion=fechaAux) then
-                            raise_application_error(-20600,:new.id_instalacion ||' La instalación está ocupada a la en el horario de esa clase.'); 
-                    END IF;
-                    END LOOP;
-            END;
-        """
-
-        with conn.cursor() as cursor: 
-            cursor.execute(triggerEntrenador)
-            cursor.commit()
-
         trigger_entrenadores='''
             CREATE OR REPLACE TRIGGER existe
             BEFORE INSERT ON ENTRENADORES
