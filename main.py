@@ -18,7 +18,7 @@ from time import gmtime, strftime
 def conectaBase():
     conn = type(pyodbc.connect)
     try:
-        conn = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=oracle0.ugr.es;Service Name=practbd.oracle0.ugr.es;User ID=x7390452;Password=x7390452')
+        conn = pyodbc.connect('DRIVER={Devart ODBC Driver for Oracle};Direct=True;Host=oracle0.ugr.es;Service Name=practbd.oracle0.ugr.es;User ID=x7021155;Password=x7021155')
         conn.autocommit = False
         
     except Exception as ex:

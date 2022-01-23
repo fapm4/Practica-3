@@ -74,6 +74,7 @@ def createTables(conn):
             FECHA DATE,
             CONSTRAINT PK_RESERVA PRIMARY KEY(DNI),
             CONSTRAINT FK_RESERVA_INSTALACION FOREIGN KEY(ID_INSTALACION) REFERENCES INSTALACION)
+            ON DELETE CASCADE
         '''
 
         with conn.cursor() as cursor: 
@@ -84,7 +85,8 @@ def createTables(conn):
             DNI VARCHAR2(9),
             ID_CLASE VARCHAR2(9),
             CONSTRAINT PK_APUNTADO PRIMARY KEY(DNI),
-            CONSTRAINT FK_APUNTADO_CLASE FOREIGN KEY(ID_CLASE) REFERENCES CLASE)
+            CONSTRAINT FK_APUNTADO_CLASE FOREIGN KEY(ID_CLASE) REFERENCES CLASE),
+            CONSTRAINT FK_APUNTADO_CLIENTE FOREIGN KEY(DNI) REFERENCES CLIENTES)
         '''
 
         with conn.cursor() as cursor: 
@@ -106,8 +108,8 @@ def createTables(conn):
         createLugar = ''' CREATE TABLE LUGAR(
             id_instalacion VARCHAR2(9),
             id_clase VARCHAR2(9),
-            CONSTRAINT EK_CLASEL FOREIGN KEY (id_clase) REFERENCES CLASE,
-            CONSTRAINT EK_INSTALACION FOREIGN KEY (id_instalacion) REFERENCES INSTALACION,
+            CONSTRAINT EK_CLASEL FOREIGN KEY (id_clase) REFERENCES CLASE (id_clase) ON DELETE CASCADE,
+            CONSTRAINT EK_INSTALACION FOREIGN KEY (id_instalacion) REFERENCES INSTALACION (id_instalacion) ON DELETE CASCADE,
             CONSTRAINT PK_LUGAR PRIMARY KEY(id_clase,id_instalacion))
         '''
 
@@ -144,6 +146,34 @@ def createTables(conn):
         with conn.cursor() as cursor: 
             cursor.execute(triggerInstalacion)        
 
+
+        triggerEntrenador =  """
+            create or replace trigger NO_OCUPADO
+            before insert 
+            ON IMPARTE
+            FOR EACH ROW
+
+            DECLARE 
+                v_horario_entrenador  clase.horario%TYPE;
+                fechaAux clase.horario%TYPE;
+
+                    
+            BEGIN
+                select horario INTO fechaAux from clase where id_clase=:new.id_clase;
+
+                FOR I IN(SELECT * FROM IMPARTE WHERE dni=:new.dni)
+                    LOOP
+                    SELECT HORARIO into v_horario_entrenador FROM CLASE WHERE id_clase=I.id_clase;
+                    IF (v_horario_entrenador=fechaAux) then
+                            raise_application_error(-20600,:new.dni ||' El entrenador está ocupado en el horario de esa clase.'); 
+                    END IF;
+                    END LOOP;
+            END;
+        """
+
+        with conn.cursor() as cursor: 
+            cursor.execute(triggerEntrenador)  
+            
         triggerCaracterTelefono = '''
         CREATE OR REPLACE TRIGGER CONTROL_TELEFONO
         BEFORE INSERT OR UPDATE ON CLIENTES FOR EACH ROW
@@ -290,7 +320,7 @@ def createTables(conn):
             cursor.commit()
             
         triggerDNIcorrecto = '''
-            CREATE OR REPLACE TRIGGER letraDNI
+            CREATE OR REPLACE TRIGGER formatoDNI
             BEFORE INSERT OR UPDATE OF DNI ON ENTRENADORES 
             FOR EACH ROW
             DECLARE
