@@ -472,7 +472,7 @@ def mostrarClasesDeCliente(conn):
                 dataClientes = cursor.fetchall()
 
                 cursor.execute(sentenciaAforo)
-                aforoApuntado = cursor.fetchone();
+                aforoApuntado = cursor.fetchone()
 
                 if len(dataClientes) != 0:
                     print("----------------------------------------")
