@@ -33,7 +33,7 @@ def registrar_instalacion(conn):
 
 
 
-def mostrar_instalaciones(conn):
+def mostrar_instalacion(conn):
     print("\n")
     cursor = conn.cursor()
     consulta = "SELECT * FROM INSTALACION"
@@ -63,7 +63,7 @@ def gestionInstalacion(conn):
         if(opcion == 1):
             registrar_instalacion(conn)
         elif(opcion == 2):
-            mostrar_instalaciones(conn)
+            mostrar_instalacion(conn)
         elif(opcion==3):
             reservar_instalacion(conn)
         elif(opcion==4):
