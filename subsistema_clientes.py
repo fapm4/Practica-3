@@ -342,7 +342,7 @@ def apuntarAClase(conn, dni, idclase):
             idClase = idclase
         else:
             existe = subsistema_clases.mostrar_clases_con_instalacion(conn)
-            if(existe == 1):
+            if(existe == 0):
                 print("--------------------------------------")
                 print("No hay clases con instalación asignada")
                 print("--------------------------------------")
