@@ -456,10 +456,10 @@ def muestraClientes(conn):
         print(ex)
 
 def mostrarClasesDeCliente(conn):
+
     dniCliente = str(input("DNI: "))
 
     if buscaDato(conn, dniCliente, "clientes") == 0:
-        
         sentencia = """
         SELECT C.ID_CLASE, TEMATICA, HORARIO, I.ID_INSTALACION, AFORO
         FROM CLASE C, INSTALACION I, APUNTADO A, LUGAR L 
@@ -468,16 +468,11 @@ def mostrarClasesDeCliente(conn):
         AND L.ID_CLASE = C.ID_CLASE;
         """%(dniCliente, dniCliente)
 
-        sentenciaAforo = """
-        SELECT COUNT(DNI) FROM APUNTADO """
 
         try:
             with conn.cursor() as cursor:
                 cursor.execute(sentencia)
                 dataClientes = cursor.fetchall()
-
-                cursor.execute(sentenciaAforo)
-                aforoApuntado = cursor.fetchone()
 
                 if len(dataClientes) != 0:
                     print("----------------------------------------")
@@ -488,6 +483,15 @@ def mostrarClasesDeCliente(conn):
                         print("Horario: %s"%(prod[2]))
                         print("ID de la instalación: %s"%(prod[3]))
                         print("Aforo máximo: %s"%(prod[4]))
+
+                        sentenciaAforo = """
+                            SELECT COUNT(DNI) FROM APUNTADO WHERE ID_CLASE = %i
+                            """%(int(prod[0]))
+
+                        with conn.cursor() as cursor:
+                            cursor.execute(sentenciaAforo)
+                            aforoApuntado = cursor.fetchone()
+
                         print("Aforo actual: %s"%(aforoApuntado[0]))
                         print("#############################################")
                 else:
@@ -502,11 +506,40 @@ def mostrarClasesDeCliente(conn):
         print("El cliente no existe")
         print("--------------------")
 
+def mostrarClientesEnClase(conn):
+    subsistema_clases.mostrar_clases_con_instalacion(conn)
+    idClase = str(input("ID de la clase: "))
+
+    if(buscaDato(conn, idClase, "clases") == 0):
+        sentencia = """
+        SELECT C.NOMBRE, C.APELLIDOS FROM CLIENTES C, CLASE C, APUNTADO A 
+        WHERE A.ID_CLASE = %i AND C.DNI = A.DNI GROUP BY(C.NOMBRE, C.APELLIDOS);
+        """%(int(idClase))
+
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(sentencia)
+                dataClientes = cursor.fetchall()
+
+                if len(dataClientes) != 0:
+                    print("----------------------------------------")
+                    for prod in dataClientes:
+                        print("Nombre: %s | Apellidos: %s "%(prod[0], prod[1]))
+                    print("----------------------------------------")
+
+
+        except Exception as ex:
+            print(ex)
+    else:
+        print("------------------")
+        print("No existe la clase")
+        print("------------------")
+
 def gestionClientes(conn):
     os.system('cls' if os.name == 'nt' else 'clear')
     val = 1
     
-    while(val >= 1 and val <= 7) and val != 8:
+    while(val >= 1 and val <= 8) and val != 9:
         print('Gestión de Clientes\nPor favor indique la gestion a realizar\n')
         print('1. Añadir un nuevo cliente')
         print('2. Borrar un cliente')
@@ -515,7 +548,8 @@ def gestionClientes(conn):
         print('5. Apuntar un cliente a una clase')
         print('6. Mostrar datos de los clientes')
         print('7. Mostrar clases de un cliente')
-        print('8. Volver al menú principal')
+        print('8. Mostrar clientes en una clase')
+        print('9. Volver al menú principal')
         print('Introduce opción: ')
         val = int(input())
 
@@ -533,6 +567,8 @@ def gestionClientes(conn):
             muestraClientes(conn)
         elif val == 7:
             mostrarClasesDeCliente(conn)
+        elif val == 8:
+            mostrarClientesEnClase(conn)
 
         conn.commit()
 ##########################################################################################################################
