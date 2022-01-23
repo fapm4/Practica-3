@@ -84,26 +84,32 @@ def reservar_instalacion(conn):
     dia =(input("Introduce el día en el que tentrá lugar la reserva(YYYY/MM/DD): "))
     hora = (input("Introduce la hora a la que tendrá lugar la reserva(HH24:MI): "))
 
-    f = "TO_DATE('" + str(dia) + str(hora) + "/"+ ":00','YYYY/MM/DD HH24:MI')"
+    f = "TO_DATE('" + str(dia)  + " " + str(hora) + \
+         ":00', 'YYYY/MM/DD HH24:MI')"
 
-    cursor.execute("SELECT * FROM RESERVA WHERE id_instalacion= %s")%(n_inst)
+    print(f)
+
+    cursor.execute("SELECT * FROM RESERVA WHERE id_instalacion = '%s'"%(str(n_inst)))
     lista=cursor.fetchall()
     existe = True
     for row in lista:
-        if(row[2]==fecha):
+        print(row[2])
+        if(row[2]==f):
             existe=False
             break
+
     if(existe):
-        consulta = "INSERT INTO RESERVA (id_instalacion,dni,fecha) values (%s,%s,%s)"%(n_inst,dni,f)
+        consulta = "INSERT INTO RESERVA (dni,id_instalacion,fecha) values ('%s',%i,%s)"%(str(dni),int(n_inst),f)
+        try:
+            cursor.execute(consulta)
+            cursor.commit()
+        except Exception as ex:
+            print(ex)
+            cursor.rollback()
     else:
         print("Ya hay una reserva a esa hora")
 
-    try:
-        cursor.execute(consulta)
-        cursor.commit()
-    except Exception as ex:
-        print(ex)
-        cursor.rollback()
+
 
 def cancelar_reserva(conn):
     mid = max_id(conn)

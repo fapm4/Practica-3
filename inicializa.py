@@ -73,7 +73,7 @@ def createTables(conn):
             ID_INSTALACION VARCHAR2(9),
             FECHA DATE,
             CONSTRAINT PK_RESERVA PRIMARY KEY(DNI),
-            CONSTRAINT FK_RESERVA_INSTALACION FOREIGN KEY(ID_INSTALACION) REFERENCES INSTALACION)
+            CONSTRAINT FK_RESERVA_INSTALACION_RESERVA FOREIGN KEY(ID_INSTALACION) REFERENCES INSTALACION ON DELETE CASCADE)
         '''
 
         with conn.cursor() as cursor: 
@@ -122,7 +122,7 @@ def createTables(conn):
             ID_INSTALACION VARCHAR2(9),
             FECHA DATE,
             CONSTRAINT PK_RESERVA_HIST PRIMARY KEY(DNI),
-            CONSTRAINT FK_RESERVA_INSTALACION FOREIGN KEY(ID_INSTALACION) REFERENCES INSTALACION)
+            CONSTRAINT FK_RESERVA_INSTALACION FOREIGN KEY(ID_INSTALACION) REFERENCES INSTALACION ON DELETE CASCADE) 
         '''
 
         with conn.cursor() as cursor: 
@@ -342,9 +342,9 @@ def createTables(conn):
         AFTER INSERT ON reserva
         FOR EACH ROW
         BEGIN
-        INSERT INTO reserva_historico(dni,id_instalacion, fecha)
-        VALUES (NEW.dni, NEW.id_instalacion, NEW.fecha, CURDATE());
-        END"""
+        INSERT INTO reserva_historico(dni,id_instalacion)
+        VALUES (NEW.dni, NEW.id_instalacion, NEW.fecha);
+        END;"""
 
         with conn.cursor() as cursor: 
             cursor.execute(triggerReservaHistorico)
