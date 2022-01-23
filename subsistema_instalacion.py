@@ -85,9 +85,7 @@ def reservar_instalacion(conn):
     hora = (input("Introduce la hora a la que tendrá lugar la reserva(HH24:MI): "))
 
     f = "TO_DATE('" + str(dia)  + " " + str(hora) + \
-         ":00', 'YYYY/MM/DD HH24:MI')"
-
-    print(f)
+         "', 'YYYY/MM/DD HH24:MI')"
 
     cursor.execute("SELECT * FROM RESERVA WHERE id_instalacion = '%s'"%(str(n_inst)))
     lista=cursor.fetchall()
@@ -99,7 +97,8 @@ def reservar_instalacion(conn):
             break
 
     if(existe):
-        consulta = "INSERT INTO RESERVA (dni,id_instalacion,fecha) values ('%s',%i,%s)"%(str(dni),int(n_inst),f)
+        consulta = "INSERT INTO RESERVA (dni,id_instalacion,fecha) values ('" + str(dni) + "'," + str(n_inst) + "," + str(f) + ")"
+        #print(consulta)
         try:
             cursor.execute(consulta)
             cursor.commit()
