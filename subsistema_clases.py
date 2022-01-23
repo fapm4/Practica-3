@@ -246,7 +246,7 @@ def mostrar_clases_sin_entrenador(conn):
     cursor.execute(consulta)
     lista = cursor.fetchall()
     if(len(lista) == 0):
-        print("\nNo hay entrenadores disponibles.\n")
+        print("\nNo hay clases disponibles.\n")
     else:
         for row in lista:
             cpm = []
@@ -265,7 +265,7 @@ def mostrar_clases_con_entrenador(conn):
     cursor.execute(consulta)
     lista = cursor.fetchall()
     if(len(lista) == 0):
-        print("\nNo hay entrenadores disponibles.\n")
+        print("\nNo hay clases disponibles.\n")
     else:
         for row in lista:
             cpm = []
