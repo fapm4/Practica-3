@@ -343,82 +343,87 @@ def apuntarAClase(conn, dni, idclase):
         else:
             existe = subsistema_clases.mostrar_clases_con_instalacion(conn)
             if(existe == 1):
-                idClase = str(input("ID de la clase: "))
+                print("--------------------------------------")
+                print("No hay clases con instalación asignada")
+                print("--------------------------------------")
             
+            else:
+                idClase = str(input("ID de la clase: "))
+
             # Busco la clase
-            if buscaDato(conn, idClase, "clases") == 0:
-                #print("Clase encontrada")
+                if buscaDato(conn, idClase, "clases") == 0:
+                    #print("Clase encontrada")
 
-                # Primero miro el aforo de la clase
-                sentencia = """
-                SELECT AFORO FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i AND L.ID_INSTALACION = I.ID_INSTALACION
-                AND L.ID_INSTALACION = (SELECT DISTINCT(I.ID_INSTALACION) 
-                FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i AND L.ID_INSTALACION = I.ID_INSTALACION)
-                """%(int(idClase), int(idClase))
-
-                #print(sentencia)
-                try:
-                    with conn.cursor() as cursor:
-                        cursor.execute(sentencia)
-                        aforoMaximo = cursor.fetchone()[0]
-
-                except Exception as ex:
-                    print(ex)
-                    conn.rollback()
-        
-                # Después busco en apuntados
-                sentencia = """
-                select count(DNI) from APUNTADO where ID_CLASE = %i;
-                """%(int(idClase))
-
-                try:
-                    with conn.cursor() as cursor:
-                        cursor.execute(sentencia)
-                        aforoActual = cursor.fetchone()[0]
-
-                except Exception as ex:
-                    print(ex)
-                    conn.rollback()
-
-                # Si queda espacio, meto al cliente
-                if(aforoActual + 1 <= aforoMaximo):
-                    # Después miro el tipo de suscripcion y el número de clases mensual -> Trigger
-                    clases = obtenNumClases(conn, dniCliente)
-                    # Actualizo el número de clases
+                    # Primero miro el aforo de la clase
                     sentencia = """
-                    UPDATE CLIENTES SET 
-                    CLASES_APUNTADAS = %i WHERE DNI = '%s'
-                    """%(clases + 1, dniCliente)
+                    SELECT AFORO FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i AND L.ID_INSTALACION = I.ID_INSTALACION
+                    AND L.ID_INSTALACION = (SELECT DISTINCT(I.ID_INSTALACION) 
+                    FROM INSTALACION I, LUGAR L WHERE L.ID_CLASE = %i AND L.ID_INSTALACION = I.ID_INSTALACION)
+                    """%(int(idClase), int(idClase))
+
+                    #print(sentencia)
+                    try:
+                        with conn.cursor() as cursor:
+                            cursor.execute(sentencia)
+                            aforoMaximo = cursor.fetchone()[0]
+
+                    except Exception as ex:
+                        print(ex)
+                        conn.rollback()
+            
+                    # Después busco en apuntados
+                    sentencia = """
+                    select count(DNI) from APUNTADO where ID_CLASE = %i;
+                    """%(int(idClase))
 
                     try:
                         with conn.cursor() as cursor:
                             cursor.execute(sentencia)
-                            # Me queda insertar en apuntado
-
-                            sentencia = """
-                            INSERT INTO APUNTADO VALUES('%s', %i)
-                            """%(dniCliente, int(idClase))
-
-                            cursor.execute(sentencia)
-                            cursor.commit()
-                            print("-------------------------------------------------------------------")
-                            print("Cliente con DNI: %s apuntado satisfactoriamente a la clase con ID: %i"%(str(dniCliente), int(idClase)))
-                            print("-------------------------------------------------------------------")
+                            aforoActual = cursor.fetchone()[0]
 
                     except Exception as ex:
-                        muestraExcepcion(ex)
+                        print(ex)
                         conn.rollback()
 
+                    # Si queda espacio, meto al cliente
+                    if(aforoActual + 1 <= aforoMaximo):
+                        # Después miro el tipo de suscripcion y el número de clases mensual -> Trigger
+                        clases = obtenNumClases(conn, dniCliente)
+                        # Actualizo el número de clases
+                        sentencia = """
+                        UPDATE CLIENTES SET 
+                        CLASES_APUNTADAS = %i WHERE DNI = '%s'
+                        """%(clases + 1, dniCliente)
+
+                        try:
+                            with conn.cursor() as cursor:
+                                cursor.execute(sentencia)
+                                # Me queda insertar en apuntado
+
+                                sentencia = """
+                                INSERT INTO APUNTADO VALUES('%s', %i)
+                                """%(dniCliente, int(idClase))
+
+                                cursor.execute(sentencia)
+                                cursor.commit()
+                                print("-------------------------------------------------------------------")
+                                print("Cliente con DNI: %s apuntado satisfactoriamente a la clase con ID: %i"%(str(dniCliente), int(idClase)))
+                                print("-------------------------------------------------------------------")
+
+                        except Exception as ex:
+                            muestraExcepcion(ex)
+                            conn.rollback()
+
+                    else:
+                        print("-----------------------")
+                        print("Aforo máximo completado")
+                        print("-----------------------")
+                        conn.rollback()
                 else:
-                    print("-----------------------")
-                    print("Aforo máximo completado")
-                    print("-----------------------")
+                    print("------------------")
+                    print("No existe la clase")
+                    print("------------------")
                     conn.rollback()
-            else:
-                print("------------------")
-                print("No existe la clase")
-                print("------------------")
-                conn.rollback()
     else:
         print("--------------------")
         print("El cliente no existe")
