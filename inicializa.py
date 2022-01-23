@@ -338,17 +338,17 @@ def createTables(conn):
             cursor.execute(triggerLargoTlfe)
             cursor.commit()
 
-        triggerReservaHistorico = """CREATE TRIGGER trigger_reserva_historico
-        AFTER INSERT ON reserva
-        FOR EACH ROW
-        BEGIN
-        INSERT INTO reserva_historico(dni,id_instalacion)
-        VALUES (NEW.dni, NEW.id_instalacion, NEW.fecha);
-        END;"""
+        #triggerReservaHistorico = """CREATE TRIGGER trigger_reserva_historico
+        #AFTER INSERT ON reserva
+        #FOR EACH ROW
+        #BEGIN
+        #INSERT INTO reserva_historico(dni,id_instalacion,fecha)
+        #VALUES (NEW.dni, NEW.id_instalacion, NEW.fecha);
+        #END;
 
-        with conn.cursor() as cursor: 
-            cursor.execute(triggerReservaHistorico)
-            cursor.commit()
+        #with conn.cursor() as cursor: 
+        #    cursor.execute(triggerReservaHistorico)
+        #    cursor.commit()
 
     except Exception as ex:
         print(ex)
