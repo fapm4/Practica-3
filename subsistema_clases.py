@@ -216,6 +216,28 @@ def mostrar_clases_sin_instalacion(conn):
                 print("\n")
 
 
+def mostrar_clases_con_instalacion(conn):
+    print("\n")
+    n_id = id_clases_con_instalacion(conn)
+    cursor = conn.cursor()
+    consulta = "SELECT * FROM CLASE"
+    cursor.execute(consulta)
+    lista = cursor.fetchall()
+    if(len(lista) == 0):
+        print("\nNo hay clases disponibles.\n")
+        return 0
+    else:
+        for row in lista:
+            cpm = []
+            cpm.append(int(row[0]))
+            if(all(item in n_id for item in cpm)):
+                msg = ("ID: %s Temática: %s  Fecha: %s") % (
+                    row[0], row[1], row[2])
+                print(msg)
+                print("\n")
+        return 1
+
+
 def mostrar_clases_sin_entrenador(conn):
     print("\n")
     n_id = id_clases_con_entrenador(conn)
@@ -230,6 +252,25 @@ def mostrar_clases_sin_entrenador(conn):
             cpm = []
             cpm.append(int(row[0]))
             if(not all(item in n_id for item in cpm)):
+                msg = ("ID: %s Temática: %s  Fecha: %s") % (
+                    row[0], row[1], row[2])
+                print(msg)
+                print("\n")
+
+def mostrar_clases_con_entrenador(conn):
+    print("\n")
+    n_id = id_clases_con_entrenador(conn)
+    cursor = conn.cursor()
+    consulta = "SELECT * FROM CLASE"
+    cursor.execute(consulta)
+    lista = cursor.fetchall()
+    if(len(lista) == 0):
+        print("\nNo hay entrenadores disponibles.\n")
+    else:
+        for row in lista:
+            cpm = []
+            cpm.append(int(row[0]))
+            if(all(item in n_id for item in cpm)):
                 msg = ("ID: %s Temática: %s  Fecha: %s") % (
                     row[0], row[1], row[2])
                 print(msg)
@@ -368,12 +409,16 @@ def asignar_instalacion(conn):
 
 def gestionClases(conn):
     opcion = 1
-    while 1 <= opcion <= 5:
+    while 1 <= opcion <= 9:
         print("1. Crear una clase.")
         print("2. Borrar clases.")
         print("3. Mostrar clases.")
         print("4. Asignar entrenador a la clase.")
         print("5. Asignar instalación a la clase.")
+        print("6. Mostrar clase con instalacion.")
+        print("7. Mostrar clase sin instalacion.")
+        print("8. Mostrar clase sin entrenador.")
+        print("9. Mostrar clase con entrenador.")
         print("Cualquier otro número para salir.")
 
         while True:
@@ -394,3 +439,11 @@ def gestionClases(conn):
             asignar_entrenador(conn)
         elif(opcion == 5):
             asignar_instalacion(conn)
+        elif(opcion == 6):
+            mostrar_clases_con_instalacion(conn)
+        elif(opcion == 7):
+            mostrar_clases_sin_instalacion(conn)
+        elif(opcion == 8):
+            mostrar_clases_sin_entrenador(conn)
+        elif(opcion == 9):
+            mostrar_clases_con_entrenador(conn)
