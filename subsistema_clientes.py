@@ -341,7 +341,7 @@ def apuntarAClase(conn, dni, idclase):
         if(idclase != ""):
             idClase = idclase
         else:
-            existe = subsistema_clases.mostrar_clases(conn)
+            existe = subsistema_clases.mostrar_clases_con_instalacion(conn)
             if(existe == 1):
                 idClase = str(input("ID de la clase: "))
             
