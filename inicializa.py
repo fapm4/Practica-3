@@ -356,9 +356,11 @@ def createTables(conn):
 #In [ ]:
 
 def dropBD(conn):
-    tablas=["LUGAR", "IMPARTE", "APUNTADO", "RESERVA", "INSTALACION", "CLIENTES", "ENTRENADORES", "CLASE"]
+    # Comentar al profesor -----------------------------------
+    tablas=["LUGAR", "IMPARTE", "APUNTADO", "RESERVA", "RESERVA_HISTORICO", "INSTALACION", "CLIENTES", "ENTRENADORES", "CLASE"]
     i=0
-    while i < 8:        
+    # --------
+    while i < 9:        
         try:
             vaciado = "DROP TABLE " + tablas[i]
 
